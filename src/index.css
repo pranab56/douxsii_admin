@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* scroll bar */ 
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #dfdfdf00;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #46000B;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #46000B;
+}     
+
+.ant-form-item{
+    margin-bottom: 15px !important;
+}
+
+/* AntD Password Toggle Eye Icon Styling */
+.ant-input-password-icon,
+.ant-input-password-icon svg,
+.ant-input-suffix .anticon,
+.ant-input-password .anticon {
+    color: #ffffff !important;
+    cursor: pointer !important;
+}
+.ant-input-password-icon:hover,
+.ant-input-password-icon:hover svg,
+.ant-input-suffix .anticon:hover,
+.ant-input-password .anticon:hover {
+    color: #ffffff !important;
+    cursor: pointer !important;
+}
+
+/* AntD Pagination Dark Circle styling */
+.custom-antd-pagination .ant-pagination-item, 
+.custom-antd-pagination .ant-pagination-prev, 
+.custom-antd-pagination .ant-pagination-next {
+    border-radius: 50% !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: transparent !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    transition: all 0.2s !important;
+}
+.custom-antd-pagination .ant-pagination-item a {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-weight: 500 !important;
+}
+.custom-antd-pagination .ant-pagination-item-active {
+    background: #46000B !important;
+    border-color: #46000B !important;
+}
+.custom-antd-pagination .ant-pagination-item-active a {
+    color: #ffffff !important;
+}
+.custom-antd-pagination .ant-pagination-prev .ant-pagination-item-link,
+.custom-antd-pagination .ant-pagination-next .ant-pagination-item-link {
+    color: rgba(255, 255, 255, 0.6) !important;
+    background: transparent !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.custom-antd-pagination .ant-pagination-item:hover,
+.custom-antd-pagination .ant-pagination-prev:hover,
+.custom-antd-pagination .ant-pagination-next:hover {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+.custom-antd-pagination .ant-pagination-jump-prev,
+.custom-antd-pagination .ant-pagination-jump-next {
+    color: rgba(255, 255, 255, 0.4) !important;
+    background: transparent !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* ─── Jodit Editor Dark Theme ─── */
+.jodit-theme-dark .jodit-container {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background: #2a0008 !important;
+}
+.jodit-theme-dark .jodit-toolbar__box {
+    background: #3d0010 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+.jodit-theme-dark .jodit-toolbar-editor-collection_mode_horizontal {
+    background: #3d0010 !important;
+}
+.jodit-theme-dark .jodit-toolbar-button__button,
+.jodit-theme-dark .jodit-toolbar-button {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+.jodit-theme-dark .jodit-toolbar-button__button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+.jodit-theme-dark .jodit-toolbar-button_disabled .jodit-toolbar-button__button {
+    color: rgba(255, 255, 255, 0.2) !important;
+}
+.jodit-theme-dark .jodit-workplace {
+    background: #2a0008 !important;
+    color: #ffffff !important;
+}
+.jodit-theme-dark .jodit-wysiwyg {
+    background: #2a0008 !important;
+    color: #ffffff !important;
+    caret-color: #fff !important;
+}
+.jodit-theme-dark .jodit-status-bar {
+    background: #3d0010 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+.jodit-theme-dark .jodit-status-bar a {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+.jodit-theme-dark svg {
+    fill: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* AntD 6-Digit OTP Input Styling */
+.otp-input-boxes {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+}
+.otp-input-boxes .ant-otp-input,
+.otp-input-boxes .ant-input {
+    background-color: #530B15 !important;
+    border: 1.5px solid #7d1522 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    height: 52px !important;
+    text-align: center !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+.otp-input-boxes .ant-otp-input:focus,
+.otp-input-boxes .ant-input:focus,
+.otp-input-boxes .ant-otp-input-active {
+    border-color: #e57373 !important;
+    box-shadow: 0 0 0 2px rgba(229, 115, 115, 0.25) !important;
+    background-color: #610E1A !important;
+}

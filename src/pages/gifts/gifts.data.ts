@@ -1,0 +1,102 @@
+import { Gift } from './gifts.types';
+
+export const MOCK_GIFTS: Gift[] = [
+    {
+        key: '1',
+        giftId: 'GIFT-1001',
+        senderName: 'Sarah Johnson',
+        senderEmail: 'sarah.j@example.com',
+        receiverName: 'Mike Chen',
+        receiverEmail: 'mike.chen@example.com',
+        amount: '$89.99',
+        message: 'Happy Birthday! Enjoy your day 🎉',
+        productName: 'Rose Bouquet Premium',
+        productImage: '/rose_bouquet.png',
+        sentDate: '2026-06-15',
+        status: 'Redeemed'
+    },
+    {
+        key: '2',
+        giftId: 'GIFT-1002',
+        senderName: 'Emily Davis',
+        senderEmail: 'emily.davis@example.com',
+        receiverName: 'Tom Wilson',
+        receiverEmail: 'tom.w@example.com',
+        amount: '$45.00',
+        message: 'Thinking of you, get well soon!',
+        productName: 'Lavender Spa Set',
+        productImage: '/spa_set.png',
+        sentDate: '2026-06-14',
+        status: 'Pending'
+    },
+    {
+        key: '3',
+        giftId: 'GIFT-1003',
+        senderName: 'James Lee',
+        senderEmail: 'james.lee@example.com',
+        receiverName: 'Anna Kim',
+        receiverEmail: 'anna.kim@example.com',
+        amount: '$120.00',
+        message: 'Congratulations on your promotion!',
+        productName: 'Luxury Chocolate Box',
+        productImage: '/chocolate_box.png',
+        sentDate: '2026-06-13',
+        status: 'Redeemed'
+    },
+    {
+        key: '4',
+        giftId: 'GIFT-1004',
+        senderName: 'Rachel Green',
+        senderEmail: 'rachel.g@example.com',
+        receiverName: 'Phoebe Buffay',
+        receiverEmail: 'phoebe.b@example.com',
+        amount: '$60.00',
+        message: 'Merry Christmas! 🎄',
+        productName: 'Scented Candle Bundle',
+        productImage: '/candle_bundle.png',
+        sentDate: '2026-06-10',
+        status: 'Expired'
+    },
+    {
+        key: '5',
+        giftId: 'GIFT-1005',
+        senderName: 'Carlos Mendez',
+        senderEmail: 'c.mendez@example.com',
+        receiverName: 'Sofia Reyes',
+        receiverEmail: 'sofia.r@example.com',
+        amount: '$200.00',
+        message: 'Happy Anniversary my love ❤️',
+        productName: 'Diamond Rose Vase',
+        productImage: '/diamond_vase.png',
+        sentDate: '2026-06-08',
+        status: 'Redeemed'
+    },
+    {
+        key: '6',
+        giftId: 'GIFT-1006',
+        senderName: 'Lily Thompson',
+        senderEmail: 'lily.t@example.com',
+        receiverName: 'Harry Brooks',
+        receiverEmail: 'harry.b@example.com',
+        amount: '$35.50',
+        message: 'Just because! 😊',
+        productName: 'Wildflower Posy',
+        productImage: '/wildflower_posy.png',
+        sentDate: '2026-06-06',
+        status: 'Pending'
+    },
+    {
+        key: '7',
+        giftId: 'GIFT-1007',
+        senderName: 'Nadia Patel',
+        senderEmail: 'nadia.p@example.com',
+        receiverName: 'Arjun Shah',
+        receiverEmail: 'arjun.s@example.com',
+        amount: '$75.00',
+        message: 'Happy Diwali! 🪔',
+        productName: 'Festive Sweet Hamper',
+        productImage: '/sweet_hamper.png',
+        sentDate: '2026-06-02',
+        status: 'Redeemed'
+    }
+];
