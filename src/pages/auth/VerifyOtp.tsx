@@ -111,10 +111,17 @@ const VerifyOtp = () => {
                     <button
                         type="button"
                         disabled={isResending}
-                        className="text-[#e57373] font-bold hover:underline disabled:opacity-50"
+                        className="text-[#e57373] font-bold hover:underline flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-0 bg-transparent outline-none"
                         onClick={handleResendEmail}
                     >
-                        {isResending ? "Resending..." : "Resend"}
+                        {isResending ? (
+                            <>
+                                <span className="w-3.5 h-3.5 border-2 border-[#e57373]/30 border-t-[#e57373] rounded-full animate-spin inline-block" />
+                                Resending...
+                            </>
+                        ) : (
+                            "Resend"
+                        )}
                     </button>
                 </div>
 
@@ -123,10 +130,11 @@ const VerifyOtp = () => {
                         type="primary"
                         htmlType="submit"
                         loading={isLoading}
+                        disabled={isLoading}
                         className="w-full text-base font-semibold h-11"
                         style={{ border: '1px solid #7d1522' }}
                     >
-                        Next
+                        {isLoading ? 'Verifying...' : 'Next'}
                     </Button>
                 </Form.Item>
 

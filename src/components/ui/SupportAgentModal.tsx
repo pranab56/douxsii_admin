@@ -5,6 +5,8 @@ import ModalHeader from './ModalHeader';
 import { FormInput } from './FormInput';
 import { SupportMember } from '../../features/support_team/supportApi';
 
+import { getLoadingText } from '../../utils/loadingText';
+
 interface SupportAgentModalProps {
     open: boolean;
     editingAgent: SupportMember | null;
@@ -228,10 +230,17 @@ export const SupportAgentModal = ({ open, editingAgent, onClose, onSubmit, isLoa
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full h-12 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 outline-none mt-2 disabled:opacity-50"
+                            className="w-full h-12 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 outline-none mt-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ background: '#7a0015' }}
                         >
-                            {isLoading ? 'Saving...' : editingAgent ? 'Update Member' : 'Create Member'}
+                            {isLoading ? (
+                                <>
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                                    {getLoadingText(editingAgent ? 'Update Member' : 'Create Member')}
+                                </>
+                            ) : (
+                                editingAgent ? 'Update Member' : 'Create Member'
+                            )}
                         </button>
                     </Form>
                 </div>

@@ -204,6 +204,7 @@ const EditProfile: React.FC = () => {
                 <Form.Item className="flex justify-center mt-6 mb-0">
                     <Button 
                         loading={isUpdating}
+                        disabled={isUpdating}
                         style={{ 
                             height: 44, 
                             borderRadius: '10px', 

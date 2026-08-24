@@ -30,7 +30,7 @@ const FAQs = () => {
     const { data: faqResponse, isLoading, isFetching } = useGetAllFaqQuery({ page });
     const [createFaq, { isLoading: isCreating }] = useCreateFaqMutation();
     const [updateFaq, { isLoading: isUpdating }] = useUpdateFaqMutation();
-    const [deleteFaq] = useDeleteFaqMutation();
+    const [deleteFaq, { isLoading: isDeleting }] = useDeleteFaqMutation();
 
     const faqList: FaqItem[] = faqResponse?.data || [];
     const meta = faqResponse?.meta;
@@ -184,6 +184,8 @@ const FAQs = () => {
                 title="Delete FAQ"
                 description="This FAQ entry will be removed permanently. Are you sure?"
                 type="danger"
+                confirmText="Delete"
+                isLoading={isDeleting}
                 onConfirm={handleDeleteConfirm}
                 onCancel={() => setConfirmOpen(false)}
             />

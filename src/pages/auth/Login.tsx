@@ -104,10 +104,11 @@ const Login = () => {
                         type="primary"
                         htmlType="submit"
                         loading={isLoading}
+                        disabled={isLoading}
                         className="w-full text-base font-bold uppercase tracking-wider"
                         style={{ border: '1px solid #7d1522' }}
                     >
-                        Login
+                        {isLoading ? 'Logging in...' : 'Login'}
                     </Button>
                 </Form.Item>
             </Form>

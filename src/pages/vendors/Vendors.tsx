@@ -40,7 +40,7 @@ const Vendors = () => {
         page,
     });
 
-    const [blockUnblockUser] = useBlockUnblockUserMutation();
+    const [blockUnblockUser, { isLoading: isBlocking }] = useBlockUnblockUserMutation();
 
     const rawVendors = vendorsResponse?.data?.result || [];
     const meta = vendorsResponse?.meta;
@@ -103,7 +103,7 @@ const Vendors = () => {
             title: 'Partner / Store',
             key: 'store',
             render: (record: User) => (
-                <div 
+                <div
                     className="flex items-center gap-3 cursor-pointer select-none"
                     onClick={() => handleOpenDetails(record)}
                 >
@@ -142,12 +142,11 @@ const Vendors = () => {
             dataIndex: 'status',
             key: 'status',
             render: (status: string, record: User) => (
-                <span 
-                    className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${
-                        record.isActive 
-                            ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
+                <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${record.isActive
+                            ? 'bg-green-500/10 text-[#10b981] border border-green-500/20'
                             : 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
-                    }`}
+                        }`}
                 >
                     {status}
                 </span>
@@ -158,23 +157,23 @@ const Vendors = () => {
             key: 'actions',
             render: (record: User) => (
                 <div className="flex items-center gap-6">
-                    <FiEye 
-                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer" 
-                        size={18} 
+                    <FiEye
+                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer"
+                        size={18}
                         title="View Details"
                         onClick={() => handleOpenDetails(record)}
                     />
                     {record.isActive ? (
-                        <FiUserMinus 
-                            className="text-[#fbbf24] hover:text-[#fde047] cursor-pointer" 
-                            size={18} 
+                        <FiUserMinus
+                            className="text-[#fbbf24] hover:text-[#fde047] cursor-pointer"
+                            size={18}
                             title="Block Vendor"
                             onClick={() => triggerBlockToggleConfirm(record)}
                         />
                     ) : (
-                        <FiUserCheck 
-                            className="text-[#10b981] hover:text-[#34d399] cursor-pointer" 
-                            size={18} 
+                        <FiUserCheck
+                            className="text-[#10b981] hover:text-[#34d399] cursor-pointer"
+                            size={18}
                             title="Unblock Vendor"
                             onClick={() => triggerBlockToggleConfirm(record)}
                         />
@@ -193,8 +192,8 @@ const Vendors = () => {
             {/* Stats Cards Section (Fixed & Unfiltered) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {stats.map((stat, idx) => (
-                    <div 
-                        key={idx} 
+                    <div
+                        key={idx}
                         className="rounded-2xl p-6 flex flex-col justify-center transition-all duration-300 hover:scale-[1.02]"
                         style={{
                             background: 'rgba(255, 255, 255, 0.04)',
@@ -208,7 +207,7 @@ const Vendors = () => {
             </div>
 
             {/* Content Table Area */}
-            <div 
+            <div
                 className="p-6 rounded-2xl flex flex-col gap-6"
                 style={{
                     background: 'rgba(255, 255, 255, 0.04)',
@@ -216,7 +215,7 @@ const Vendors = () => {
                 }}
             >
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <Search 
+                    <Search
                         value={search}
                         onChange={(val) => {
                             setSearch(val);
@@ -224,7 +223,7 @@ const Vendors = () => {
                         }}
                         placeholder="Search vendors by name, email, or address..."
                     />
-                    <CustomSelect 
+                    <CustomSelect
                         value={statusFilter}
                         onChange={(val) => {
                             setStatusFilter(val);
@@ -247,16 +246,16 @@ const Vendors = () => {
                             No vendors found.
                         </div>
                     ) : (
-                        <Table 
-                            dataSource={dataSource} 
-                            columns={columns} 
+                        <Table
+                            dataSource={dataSource}
+                            columns={columns}
                             rowKey="_id"
                         />
                     )}
                 </div>
 
                 {totalItems > pageSize && (
-                    <Pagination 
+                    <Pagination
                         current={page}
                         pageSize={pageSize}
                         total={totalItems}
@@ -283,6 +282,8 @@ const Vendors = () => {
                         : `Are you sure you want to unblock ${vendorToConfirm?.name}? They will regain access to the platform.`
                 }
                 type={vendorToConfirm?.isActive ? 'danger' : 'warning'}
+                confirmText={vendorToConfirm?.isActive ? 'Block Vendor' : 'Unblock Vendor'}
+                isLoading={isBlocking}
                 onConfirm={handleConfirmAction}
                 onCancel={() => setConfirmOpen(false)}
             />

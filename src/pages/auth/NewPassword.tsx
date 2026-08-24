@@ -97,10 +97,11 @@ const NewPassword = () => {
                         type="primary"
                         htmlType="submit"
                         loading={isLoading}
+                        disabled={isLoading}
                         className="w-full text-base font-semibold"
                         style={{ border: '1px solid #7d1522' }}
                     >
-                        Reset Password
+                        {isLoading ? 'Resetting Password...' : 'Reset Password'}
                     </Button>
                 </Form.Item>
 

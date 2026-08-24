@@ -46,8 +46,9 @@ export const ChatWindow = ({ selectedChat }: ChatWindowProps) => {
         ? (rawPic.startsWith('http') ? rawPic : `${baseURL}/${rawPic.replace(/\\/g, '/')}`)
         : null;
 
+
     return (
-        <div 
+        <div
             className="flex-1 flex flex-col rounded-2xl overflow-hidden min-h-0"
             style={{
                 background: 'rgba(255, 255, 255, 0.04)',
@@ -79,11 +80,10 @@ export const ChatWindow = ({ selectedChat }: ChatWindowProps) => {
 
                 {/* Status Badge */}
                 <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-1.5 ${
-                        selectedChat.isSolved
-                            ? 'bg-green-500/15 text-[#10b981] border border-green-500/20'
-                            : 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-1.5 ${selectedChat.isSolved
+                        ? 'bg-green-500/15 text-[#10b981] border border-green-500/20'
+                        : 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
+                        }`}>
                         {selectedChat.isSolved && <FiCheckCircle size={14} />}
                         {selectedChat.isSolved ? 'Resolved' : 'Active Ticket'}
                     </span>
@@ -116,6 +116,8 @@ export const ChatWindow = ({ selectedChat }: ChatWindowProps) => {
 
                         const timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
+
+
                         return (
                             <div
                                 key={msg._id}
@@ -130,12 +132,11 @@ export const ChatWindow = ({ selectedChat }: ChatWindowProps) => {
                                         <img src={msgAvatar} alt={senderName} className="w-7 h-7 rounded-full object-cover shrink-0 mt-1" />
                                     )}
 
-                                    <div 
-                                        className={`rounded-2xl p-4 shadow-sm ${
-                                            isAgent 
-                                                ? 'bg-[#560e18] text-white rounded-tr-none border border-[#ff4b72]/20' 
-                                                : 'bg-white/10 text-white rounded-tl-none border border-white/10'
-                                        }`}
+                                    <div
+                                        className={`rounded-2xl p-4 shadow-sm ${isAgent
+                                            ? 'bg-[#560e18] text-white rounded-tr-none border border-[#ff4b72]/20'
+                                            : 'bg-white/10 text-white rounded-tl-none border border-white/10'
+                                            }`}
                                     >
                                         {/* Image attachment if available */}
                                         {msgImageUrl && (

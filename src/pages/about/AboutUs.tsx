@@ -44,10 +44,17 @@ const AboutUs = () => {
             <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="h-11 px-6 rounded-xl text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 outline-none disabled:opacity-50"
+                className="h-11 px-6 rounded-xl text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 outline-none flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: '#ff2150' }}
             >
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? (
+                    <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                        Saving...
+                    </>
+                ) : (
+                    'Save Changes'
+                )}
             </button>
         </div>
     );

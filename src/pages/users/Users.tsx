@@ -7,7 +7,7 @@ import Pagination from '../../components/ui/Pagination';
 import UserDetailsModal from '../../components/ui/UserDetailsModal';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import Toast from '../../components/ui/Toast';
-import Search from '../../components/ui/Search'; 
+import Search from '../../components/ui/Search';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import CustomSelect from '../../components/ui/CustomSelect';
 import { User } from './users.types';
@@ -41,7 +41,7 @@ const Users = () => {
         page,
     });
 
-    const [blockUnblockUser] = useBlockUnblockUserMutation();
+    const [blockUnblockUser, { isLoading: isBlocking }] = useBlockUnblockUserMutation();
 
     const rawUsers = usersResponse?.data?.result || [];
     const meta = usersResponse?.meta;
@@ -100,7 +100,7 @@ const Users = () => {
             dataIndex: 'name',
             key: 'name',
             render: (text: string, record: User) => (
-                <div 
+                <div
                     className="flex items-center gap-3 cursor-pointer select-none"
                     onClick={() => handleOpenDetails(record)}
                 >
@@ -136,12 +136,11 @@ const Users = () => {
             dataIndex: 'status',
             key: 'status',
             render: (status: string, record: User) => (
-                <span 
-                    className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${
-                        record.isActive 
-                            ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
+                <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${record.isActive
+                            ? 'bg-green-500/10 text-[#10b981] border border-green-500/20'
                             : 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
-                    }`}
+                        }`}
                 >
                     {status}
                 </span>
@@ -152,23 +151,23 @@ const Users = () => {
             key: 'actions',
             render: (record: User) => (
                 <div className="flex items-center gap-6">
-                    <FiEye 
-                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer" 
-                        size={18} 
+                    <FiEye
+                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer"
+                        size={18}
                         title="View Details"
                         onClick={() => handleOpenDetails(record)}
                     />
                     {record.isActive ? (
-                        <FiUserMinus 
-                            className="text-[#fbbf24] hover:text-[#fde047] cursor-pointer" 
-                            size={18} 
+                        <FiUserMinus
+                            className="text-[#fbbf24] hover:text-[#fde047] cursor-pointer"
+                            size={18}
                             title="Block User"
                             onClick={() => triggerBlockToggleConfirm(record)}
                         />
                     ) : (
-                        <FiUserCheck 
-                            className="text-[#10b981] hover:text-[#34d399] cursor-pointer" 
-                            size={18} 
+                        <FiUserCheck
+                            className="text-[#10b981] hover:text-[#34d399] cursor-pointer"
+                            size={18}
                             title="Unblock User"
                             onClick={() => triggerBlockToggleConfirm(record)}
                         />
@@ -187,7 +186,7 @@ const Users = () => {
 
             <UserStats total={totalUsers} active={activeUsers} verified={verifiedUsers} blocked={blockedUsers} />
 
-            <div 
+            <div
                 className="p-6 rounded-2xl flex flex-col gap-6"
                 style={{
                     background: 'rgba(255, 255, 255, 0.04)',
@@ -195,7 +194,7 @@ const Users = () => {
                 }}
             >
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <Search 
+                    <Search
                         value={search}
                         onChange={(val) => {
                             setSearch(val);
@@ -203,7 +202,7 @@ const Users = () => {
                         }}
                         placeholder="Search users by name, email, or phone..."
                     />
-                    
+
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         {/* Status Filter */}
                         <CustomSelect
@@ -230,16 +229,16 @@ const Users = () => {
                             No users found.
                         </div>
                     ) : (
-                        <Table 
-                            dataSource={dataSource} 
-                            columns={columns} 
+                        <Table
+                            dataSource={dataSource}
+                            columns={columns}
                             rowKey="_id"
                         />
                     )}
                 </div>
 
                 {totalItems > pageSize && (
-                    <Pagination 
+                    <Pagination
                         current={page}
                         pageSize={pageSize}
                         total={totalItems}
@@ -266,6 +265,8 @@ const Users = () => {
                         : `Are you sure you want to unblock ${userToConfirm?.name}? They will regain access to the platform.`
                 }
                 type={userToConfirm?.isActive ? 'danger' : 'warning'}
+                confirmText={userToConfirm?.isActive ? 'Block User' : 'Unblock User'}
+                isLoading={isBlocking}
                 onConfirm={handleConfirmAction}
                 onCancel={() => setConfirmOpen(false)}
             />

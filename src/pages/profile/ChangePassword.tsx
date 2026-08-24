@@ -116,6 +116,7 @@ const ChangePassword = () => {
                 <Form.Item className="flex justify-center mt-6">
                     <Button 
                         loading={isLoading}
+                        disabled={isLoading}
                         style={{ 
                             height: 44, 
                             borderRadius: '10px', 
@@ -129,7 +130,7 @@ const ChangePassword = () => {
                         type="primary" 
                         htmlType="submit"
                     >
-                        {isLoading ? 'Updating...' : 'Save Password'}
+                        {isLoading ? 'Updating Password...' : 'Save Password'}
                     </Button>
                 </Form.Item>
             </Form>

@@ -2,6 +2,8 @@ import { Modal } from 'antd';
 import { FiAlertTriangle } from 'react-icons/fi';
 import { IoCloseCircleOutline } from 'react-icons/io5';
 
+import { getLoadingText } from '../../utils/loadingText';
+
 interface ConfirmModalProps {
     open: boolean;
     title: string;
@@ -87,7 +89,7 @@ export const ConfirmModal = ({
                         {isLoading ? (
                             <>
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
-                                Deleting...
+                                {getLoadingText(confirmText)}
                             </>
                         ) : (
                             confirmText

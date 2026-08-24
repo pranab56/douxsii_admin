@@ -68,10 +68,11 @@ const ForgetPassword = () => {
                         type="primary"
                         htmlType="submit"
                         loading={isLoading}
+                        disabled={isLoading}
                         className="w-full text-base font-semibold"
                         style={{ border: '1px solid #7d1522' }}
                     >
-                        Send Verification Code
+                        {isLoading ? 'Sending...' : 'Send Verification Code'}
                     </Button>
                 </Form.Item>
 

@@ -4,6 +4,8 @@ import { FaqItem } from '../../pages/faqs/faqs.types';
 import ModalHeader from './ModalHeader';
 import { FormInput } from './FormInput';
 
+import { getLoadingText } from '../../utils/loadingText';
+
 interface FaqModalProps {
     open: boolean;
     editingFaq: FaqItem | null;
@@ -97,10 +99,17 @@ export const FaqModal = ({ open, editingFaq, isSubmitting = false, onClose, onSu
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="flex-1 h-11 rounded-xl text-white font-semibold transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 outline-none disabled:opacity-50"
+                                className="flex-1 h-11 rounded-xl text-white font-semibold transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 outline-none flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 style={{ background: '#ff2150' }}
                             >
-                                {isSubmitting ? 'Saving...' : (editingFaq ? 'Update' : 'Save')}
+                                {isSubmitting ? (
+                                    <>
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                                        {getLoadingText(editingFaq ? 'Update' : 'Save')}
+                                    </>
+                                ) : (
+                                    editingFaq ? 'Update' : 'Save'
+                                )}
                             </button>
                             <button
                                 type="button"
