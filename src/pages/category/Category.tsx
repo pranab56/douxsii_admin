@@ -212,9 +212,6 @@ const Category = () => {
                                         <h3 className="text-white text-base font-bold m-0 group-hover:text-[#ff4b72] transition-colors truncate">
                                             {item.name}
                                         </h3>
-                                        <p className="text-white/40 text-[11px] font-mono m-0 mt-1 truncate">
-                                            ID: #{item._id ? item._id.slice(-6) : 'N/A'}
-                                        </p>
                                     </div>
                                 </div>
                             );
