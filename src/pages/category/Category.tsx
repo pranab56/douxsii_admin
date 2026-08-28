@@ -29,7 +29,7 @@ const Category = () => {
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     // RTK Query Hooks
-    const { data: categoryResponse, isLoading, isFetching } = useGetAllCategoryQuery({
+    const { data: categoryResponse, isLoading } = useGetAllCategoryQuery({
         page,
         searchTerm: search
     });
@@ -263,9 +263,11 @@ const Category = () => {
             <ConfirmModal
                 open={confirmOpen}
                 title="Delete Category"
-                subtitle="Are you sure you want to delete this category? This action cannot be undone."
-                confirmText={isDeleting ? 'Deleting...' : 'Delete'}
-                onClose={() => {
+                description="Are you sure you want to delete this category? This action cannot be undone."
+                type="danger"
+                confirmText="Delete"
+                isLoading={isDeleting}
+                onCancel={() => {
                     setConfirmOpen(false);
                     setDeletingId(null);
                 }}
