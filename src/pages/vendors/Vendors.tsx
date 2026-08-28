@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FiEye, FiUserMinus, FiUserCheck, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { Tooltip } from 'antd';
+import { FiEye, FiUserMinus, FiUserCheck, FiCheckCircle, FiXCircle, FiMapPin } from 'react-icons/fi';
 import PageHeader from '../../components/ui/PageHeader';
 import Table from '../../components/ui/Table';
 import Pagination from '../../components/ui/Pagination';
@@ -251,7 +252,22 @@ const Vendors = () => {
             title: 'Address',
             dataIndex: 'address',
             key: 'address',
-            render: (val?: string) => <span className="text-white text-sm">{val || 'N/A'}</span>
+            width: 280,
+            render: (val?: string) => {
+                if (!val || !val.trim()) {
+                    return <span className="text-white/40 text-xs italic">N/A</span>;
+                }
+                return (
+                    <Tooltip title={val} placement="topLeft" color="#5a121d">
+                        <div className="flex items-start gap-2 cursor-pointer max-w-[260px] group">
+                            <FiMapPin className="text-[#ff4b72] shrink-0 mt-0.5" size={14} />
+                            <span className="text-white/80 text-xs leading-relaxed line-clamp-2 group-hover:text-white transition-colors">
+                                {val}
+                            </span>
+                        </div>
+                    </Tooltip>
+                );
+            }
         },
         {
             title: 'Status',
@@ -360,7 +376,16 @@ const Vendors = () => {
             render: (record: ShopRequest) => (
                 <div>
                     <div className="text-white text-sm">{record.phone || 'N/A'}</div>
-                    <div className="text-white/40 text-xs mt-0.5 truncate max-w-[180px]">{record.address || 'N/A'}</div>
+                    {record.address ? (
+                        <Tooltip title={record.address} placement="topLeft" color="#5a121d">
+                            <div className="flex items-center gap-1.5 text-white/50 text-xs mt-0.5 max-w-[200px] hover:text-white/80 cursor-pointer transition-colors">
+                                <FiMapPin className="text-[#ff4b72] shrink-0" size={12} />
+                                <span className="truncate">{record.address}</span>
+                            </div>
+                        </Tooltip>
+                    ) : (
+                        <div className="text-white/40 text-xs mt-0.5 italic">N/A</div>
+                    )}
                 </div>
             )
         },
