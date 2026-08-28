@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { PiStorefront, PiUsersThree } from 'react-icons/pi';
 import { MdOutlineCampaign } from 'react-icons/md';
+import { BiCategory } from 'react-icons/bi';
 import { TSidebarItem } from './generateSidebarItems';
 
 const sidebarItems: TSidebarItem[] = [
@@ -43,6 +44,12 @@ const sidebarItems: TSidebarItem[] = [
         label: 'Products',
         path: 'products',
         icon: <FiBox size={20} />,
+    },
+    {
+        key: 'category',
+        label: 'Category',
+        path: 'category',
+        icon: <BiCategory size={20} />,
     },
     {
         key: 'payments',

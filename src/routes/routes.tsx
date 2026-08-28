@@ -22,6 +22,7 @@ import Community from '../pages/community/Community';
 import WalletPayments from '../pages/payments/WalletPayments';
 import Gifts from '../pages/gifts/Gifts';
 import Chats from '../pages/chats/Chats';
+import Category from '../pages/category/Category';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
             { path: 'vendors', element: <Vendors /> },
             { path: 'orders', element: <Orders /> },
             { path: 'products', element: <Products /> },
+            { path: 'category', element: <Category /> },
             { path: 'payments', element: <WalletPayments /> },
             { path: 'gifts', element: <Gifts /> },
             { path: 'support-team', element: <SupportTeam /> },
