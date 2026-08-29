@@ -19,7 +19,7 @@ const Notification = () => {
 
     const [page, setPage] = useState(1);
 
-    const { data: notificationResponse, isLoading, isFetching } = useGetAllNotificationQuery({ page });
+    const { data: notificationResponse, isLoading } = useGetAllNotificationQuery({ page });
 
     const [singleReadNotification] = useSingleReadNotificationMutation();
 
