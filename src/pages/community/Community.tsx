@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiEye } from 'react-icons/fi';
+import { FiEye, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import PageHeader from '../../components/ui/PageHeader';
 import Table from '../../components/ui/Table';
 import Pagination from '../../components/ui/Pagination';
@@ -7,7 +7,10 @@ import Search from '../../components/ui/Search';
 import CommunityPostDetailsModal from '../../components/ui/CommunityPostDetailsModal';
 import CustomSelect from '../../components/ui/CustomSelect';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { useGetAllcommunityQuery } from '../../features/community/communityApi';
+import ConfirmModal from '../../components/ui/ConfirmModal';
+import RejectReasonModal from '../../components/ui/RejectReasonModal';
+import Toast from '../../components/ui/Toast';
+import { useGetAllcommunityQuery, useAproveAndRejectMutation } from '../../features/community/communityApi';
 import { CommunityRow } from './community.types';
 import { baseURL } from '../../utils/BaseURL';
 
@@ -16,15 +19,31 @@ const Community = () => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [page, setPage] = useState(1);
 
+    // Toast Notification State
+    const [toast, setToast] = useState('');
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(''), 3000);
+    };
+
     // Modals State
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+
+    const [postToApprove, setPostToApprove] = useState<CommunityRow | null>(null);
+    const [approveModalOpen, setApproveModalOpen] = useState(false);
+
+    const [postToReject, setPostToReject] = useState<CommunityRow | null>(null);
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+
+    // Approve & Reject API Mutation Hook
+    const [aproveAndReject, { isLoading: isUpdatingStatus }] = useAproveAndRejectMutation();
 
     // Unfiltered Query for fixed Stats Cards
     const { data: statsResponse, isLoading: isStatsLoading } = useGetAllcommunityQuery();
 
     // Filtered Query for Table Data & Search
-    const { data: communityResponse, isLoading, isFetching } = useGetAllcommunityQuery({
+    const { data: communityResponse, isLoading } = useGetAllcommunityQuery({
         page,
         searchTerm: search,
     });
@@ -52,6 +71,56 @@ const Community = () => {
         setDetailsOpen(true);
     };
 
+    const triggerApprovePost = (post: CommunityRow) => {
+        setPostToApprove(post);
+        setApproveModalOpen(true);
+    };
+
+    const triggerRejectPost = (post: CommunityRow) => {
+        setPostToReject(post);
+        setRejectModalOpen(true);
+    };
+
+    const handleConfirmApprove = async () => {
+        if (!postToApprove) return;
+        try {
+            const res = await aproveAndReject({
+                postId: postToApprove._id,
+                data: {
+                    status: 'approved',
+                    resoan: 'approved',
+                    reason: 'approved',
+                }
+            }).unwrap();
+            showToast(res?.message || 'Community post approved successfully');
+        } catch (err: any) {
+            showToast(err?.data?.message || err?.message || 'Failed to approve community post');
+        } finally {
+            setApproveModalOpen(false);
+            setPostToApprove(null);
+        }
+    };
+
+    const handleConfirmReject = async (reason: string) => {
+        if (!postToReject) return;
+        try {
+            const res = await aproveAndReject({
+                postId: postToReject._id,
+                data: {
+                    status: 'rejected',
+                    resoan: reason || 'rejected',
+                    reason: reason || 'rejected',
+                }
+            }).unwrap();
+            showToast(res?.message || 'Community post rejected successfully');
+        } catch (err: any) {
+            showToast(err?.data?.message || err?.message || 'Failed to reject community post');
+        } finally {
+            setRejectModalOpen(false);
+            setPostToReject(null);
+        }
+    };
+
     const stats = [
         { label: 'Total Post', value: totalPosts },
         { label: 'Approved Posts', value: approvedPosts },
@@ -65,19 +134,19 @@ const Community = () => {
             key: 'thumbnail',
             render: (record: CommunityRow) => {
                 const mainImage = record.image;
-                const imageUrl = mainImage 
+                const imageUrl = mainImage
                     ? (mainImage.startsWith('http') ? mainImage : `${baseURL}/${mainImage.replace(/\\/g, '/')}`)
                     : null;
 
                 return (
-                    <div 
+                    <div
                         className="flex items-center gap-3 cursor-pointer select-none py-1"
                         onClick={() => handleOpenDetails(record._id)}
                     >
                         {imageUrl ? (
-                            <img 
-                                src={imageUrl} 
-                                alt={record.caption || 'Post'} 
+                            <img
+                                src={imageUrl}
+                                alt={record.caption || 'Post'}
                                 className="w-10 h-10 rounded-full object-cover shrink-0 border border-white/10"
                             />
                         ) : (
@@ -126,14 +195,13 @@ const Community = () => {
             render: (status?: string) => {
                 const st = (status || 'approved').toLowerCase();
                 return (
-                    <span 
-                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${
-                            st === 'approved' 
-                                ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
+                    <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${st === 'approved'
+                                ? 'bg-green-500/10 text-[#10b981] border border-green-500/20'
                                 : st === 'pending'
-                                ? 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
-                                : 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
-                        }`}
+                                    ? 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
+                                    : 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
+                            }`}
                     >
                         {status || 'approved'}
                     </span>
@@ -144,12 +212,24 @@ const Community = () => {
             title: 'Actions',
             key: 'actions',
             render: (record: CommunityRow) => (
-                <div className="flex items-center gap-3.5">
-                    <FiEye 
-                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer transition-colors" 
-                        size={18} 
+                <div className="flex items-center gap-3">
+                    <FiEye
+                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer transition-colors"
+                        size={18}
                         onClick={() => handleOpenDetails(record._id)}
                         title="View Details"
+                    />
+                    <FiCheckCircle
+                        className="text-[#10b981] hover:text-[#34d399] cursor-pointer transition-colors"
+                        size={18}
+                        onClick={() => triggerApprovePost(record)}
+                        title="Approve Post"
+                    />
+                    <FiXCircle
+                        className="text-[#ef4444] hover:text-[#f87171] cursor-pointer transition-colors"
+                        size={18}
+                        onClick={() => triggerRejectPost(record)}
+                        title="Reject Post"
                     />
                 </div>
             )
@@ -163,8 +243,8 @@ const Community = () => {
             {/* Stats Cards Section (Fixed & Unfiltered) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
-                    <div 
-                        key={idx} 
+                    <div
+                        key={idx}
                         className="rounded-2xl p-6 flex flex-col justify-center transition-all duration-300 hover:scale-[1.02]"
                         style={{
                             background: 'rgba(255, 255, 255, 0.04)',
@@ -178,7 +258,7 @@ const Community = () => {
             </div>
 
             {/* Content Table Area */}
-            <div 
+            <div
                 className="p-6 rounded-2xl flex flex-col gap-6"
                 style={{
                     background: 'rgba(255, 255, 255, 0.04)',
@@ -186,7 +266,7 @@ const Community = () => {
                 }}
             >
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <Search 
+                    <Search
                         value={search}
                         onChange={(val) => {
                             setSearch(val);
@@ -194,7 +274,7 @@ const Community = () => {
                         }}
                         placeholder="Search post caption..."
                     />
-                    <CustomSelect 
+                    <CustomSelect
                         value={statusFilter}
                         onChange={(val) => {
                             setStatusFilter(val);
@@ -211,23 +291,23 @@ const Community = () => {
                 </div>
 
                 <div className="overflow-x-auto relative">
-                    {isLoading || isFetching ? (
+                    {isLoading ? (
                         <LoadingSpinner text="Loading community posts..." />
                     ) : postsList.length === 0 ? (
                         <div className="py-16 text-center text-white/50 text-base">
                             No community posts found.
                         </div>
                     ) : (
-                        <Table 
-                            dataSource={postsList} 
-                            columns={columns} 
+                        <Table
+                            dataSource={postsList}
+                            columns={columns}
                             rowKey="_id"
                         />
                     )}
                 </div>
 
                 {totalItems > pageSize && (
-                    <Pagination 
+                    <Pagination
                         current={page}
                         pageSize={pageSize}
                         total={totalItems}
@@ -241,7 +321,40 @@ const Community = () => {
                 open={detailsOpen}
                 postId={selectedPostId}
                 onClose={() => setDetailsOpen(false)}
+                onApprove={triggerApprovePost}
+                onReject={triggerRejectPost}
             />
+
+            {/* Approve Confirmation Modal */}
+            <ConfirmModal
+                open={approveModalOpen}
+                title="Approve Post"
+                description="Are you sure you want to approve this community post? It will become visible on the platform."
+                type="warning"
+                confirmText="Approve"
+                isLoading={isUpdatingStatus}
+                onConfirm={handleConfirmApprove}
+                onCancel={() => {
+                    setApproveModalOpen(false);
+                    setPostToApprove(null);
+                }}
+            />
+
+            {/* Reject Reason Modal */}
+            <RejectReasonModal
+                open={rejectModalOpen}
+                title="Reject Post"
+                description="Are you sure you want to reject this community post? Please specify a reason below."
+                isLoading={isUpdatingStatus}
+                onConfirm={handleConfirmReject}
+                onCancel={() => {
+                    setRejectModalOpen(false);
+                    setPostToReject(null);
+                }}
+            />
+
+            {/* Toast Notification */}
+            <Toast message={toast} />
         </div>
     );
 };

@@ -66,10 +66,25 @@ export const communityApi = baseApi.injectEndpoints({
             },
             providesTags: ["community"],
         }),
+
+        aproveAndReject: builder.mutation<
+            { success: boolean; message: string; data?: any },
+            { postId: string; data: { status: string; resoan?: string; reason?: string } }
+        >({
+            query: ({ postId, data }) => {
+                return {
+                    url: `/community/status/${postId}`,
+                    method: "PATCH",
+                    body: data
+                };
+            },
+            invalidatesTags: ["community"]
+        }),
     }),
 });
 
 export const {
     useGetAllcommunityQuery,
     useGetSingleCommunityQuery,
+    useAproveAndRejectMutation,
 } = communityApi;

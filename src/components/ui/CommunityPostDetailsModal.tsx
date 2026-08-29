@@ -1,7 +1,7 @@
 import { Modal } from 'antd';
-import { FiHeart } from 'react-icons/fi';
+import { FiHeart, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import ModalHeader from './ModalHeader';
-import { useGetSingleCommunityQuery } from '../../features/community/communityApi';
+import { useGetSingleCommunityQuery, CommunityPost } from '../../features/community/communityApi';
 import LoadingSpinner from './LoadingSpinner';
 import { baseURL } from '../../utils/BaseURL';
 
@@ -9,9 +9,11 @@ interface CommunityPostDetailsModalProps {
     open: boolean;
     postId: string | null;
     onClose: () => void;
+    onApprove?: (post: CommunityPost) => void;
+    onReject?: (post: CommunityPost) => void;
 }
 
-export const CommunityPostDetailsModal = ({ open, postId, onClose }: CommunityPostDetailsModalProps) => {
+export const CommunityPostDetailsModal = ({ open, postId, onClose, onApprove, onReject }: CommunityPostDetailsModalProps) => {
     const { data: singleCommunityResponse, isLoading } = useGetSingleCommunityQuery(postId || '', {
         skip: !open || !postId,
     });
@@ -96,7 +98,9 @@ export const CommunityPostDetailsModal = ({ open, postId, onClose }: CommunityPo
                                 <span className={`px-3 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                                     status.toLowerCase() === 'approved' 
                                         ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
-                                        : 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
+                                        : status.toLowerCase() === 'pending'
+                                        ? 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
+                                        : 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
                                 }`}>
                                     {status}
                                 </span>
@@ -121,12 +125,39 @@ export const CommunityPostDetailsModal = ({ open, postId, onClose }: CommunityPo
                                 </div>
                             </div>
 
+                            {/* Action Buttons if Approve/Reject provided */}
+                            {onApprove && onReject && (
+                                <div className="flex items-center gap-3 mt-6 w-full">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onClose();
+                                            onApprove(post);
+                                        }}
+                                        className="flex-1 h-11 rounded-xl text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-98 cursor-pointer border-0 outline-none flex items-center justify-center gap-1.5"
+                                        style={{ background: '#10b981' }}
+                                    >
+                                        <FiCheckCircle size={16} /> Approve
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onClose();
+                                            onReject(post);
+                                        }}
+                                        className="flex-1 h-11 rounded-xl text-white text-sm font-semibold transition-all hover:bg-red-500/20 active:scale-98 cursor-pointer border border-red-500/30 bg-red-500/10 outline-none flex items-center justify-center gap-1.5 text-[#ef4444]"
+                                    >
+                                        <FiXCircle size={16} /> Reject
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Close Button */}
-                            <div className="mt-6 w-full">
+                            <div className="mt-4 w-full">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="w-full h-12 rounded-xl text-white font-medium transition-all hover:bg-white/5 active:scale-98 cursor-pointer border border-white/20 bg-transparent outline-none"
+                                    className="w-full h-11 rounded-xl text-white font-medium transition-all hover:bg-white/5 active:scale-98 cursor-pointer border border-white/20 bg-transparent outline-none text-sm"
                                 >
                                     Close
                                 </button>
