@@ -117,7 +117,7 @@ const Notification = () => {
 
             {/* Notifications List Container */}
             <div className="flex flex-col gap-4">
-                {isLoading || isFetching ? (
+                {isLoading ? (
                     <div className="py-12">
                         <LoadingSpinner text="Loading notifications..." />
                     </div>
