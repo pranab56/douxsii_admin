@@ -27,7 +27,7 @@ const FAQs = () => {
 
 
     // API Hooks
-    const { data: faqResponse, isLoading, isFetching } = useGetAllFaqQuery({ page });
+    const { data: faqResponse, isLoading } = useGetAllFaqQuery({ page });
     const [createFaq, { isLoading: isCreating }] = useCreateFaqMutation();
     const [updateFaq, { isLoading: isUpdating }] = useUpdateFaqMutation();
     const [deleteFaq, { isLoading: isDeleting }] = useDeleteFaqMutation();
@@ -114,7 +114,7 @@ const FAQs = () => {
                     border: '1px solid rgba(255, 255, 255, 0.08)'
                 }}
             >
-                {isLoading || isFetching ? (
+                {isLoading ? (
                     <LoadingSpinner text="Loading FAQs..." />
                 ) : faqList.length === 0 ? (
                     <div className="py-16 text-center text-white/50 text-base">

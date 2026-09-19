@@ -40,7 +40,7 @@ const SupportTeam = () => {
     const pageSize = 10;
 
     // RTK Query Hooks
-    const { data: supportResponse, isLoading, isFetching } = useGetAllSupportMembersQuery({ page, limit: pageSize, search });
+    const { data: supportResponse, isLoading } = useGetAllSupportMembersQuery({ page, limit: pageSize, search });
     const [createSupportMember, { isLoading: isCreating }] = useCreateSupportMemberMutation();
     const [updateSupportMember, { isLoading: isUpdating }] = useUpdateSupportMemberMutation();
     const [deleteSupportMember, { isLoading: isDeleting }] = useDeleteSupportMemberMutation();
@@ -272,7 +272,7 @@ const SupportTeam = () => {
                 />
 
                 <div className="overflow-x-auto relative">
-                    {isLoading || isFetching ? (
+                    {isLoading  ? (
                         <LoadingSpinner text="Loading support team..." />
                     ) : supportList.length === 0 ? (
                         <EmptyData message="No support team members found." />

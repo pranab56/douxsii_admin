@@ -2,7 +2,7 @@ import { Modal } from 'antd';
 import { FiUser, FiShoppingBag, FiMapPin, FiCreditCard, FiGift } from 'react-icons/fi';
 import ModalHeader from './ModalHeader';
 import InfoBlock from './InfoBlock';
-import { useSingleOrderQuery } from '../../features/orders/ordersApi';
+import { useGetSingleOrderQuery } from '../../features/shop/orderApi';
 import LoadingSpinner from './LoadingSpinner';
 import { baseURL } from '../../utils/BaseURL';
 
@@ -13,7 +13,7 @@ interface OrderDetailsModalProps {
 }
 
 export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalProps) => {
-    const { data: singleOrderResponse, isLoading } = useSingleOrderQuery(orderId || '', {
+    const { data: singleOrderResponse, isLoading } = useGetSingleOrderQuery(orderId || '', {
         skip: !open || !orderId,
     });
 
@@ -162,12 +162,12 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                                     <div>
                                                         <h5 className="text-white text-sm font-medium m-0 line-clamp-1">{prod?.name || 'Product'}</h5>
                                                         <span className="text-white/40 text-xs block mt-0.5">
-                                                            Qty: {item.quantity} × ${item.price}
+                                                            Qty: {item.quantity ?? 1} × ${item.price ?? 0}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <span className="text-white font-bold text-sm shrink-0 font-sans">
-                                                    ${item.price * item.quantity}
+                                                    ${(item.price ?? 0) * (item.quantity ?? 1)}
                                                 </span>
                                             </div>
                                         );

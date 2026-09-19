@@ -1,18 +1,15 @@
 import { useState } from 'react';
-import { FiEye } from 'react-icons/fi';
+import { FiEye, FiShoppingCart, FiCheckCircle, FiClock, FiCreditCard, FiBox } from 'react-icons/fi';
 import PageHeader from '../../components/ui/PageHeader';
 import Table from '../../components/ui/Table';
 import Pagination from '../../components/ui/Pagination';
-import Search from '../../components/ui/Search';
 import OrderDetailsModal from '../../components/ui/OrderDetailsModal';
 import CustomSelect from '../../components/ui/CustomSelect';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { useGetAllOrdersQuery } from '../../features/orders/ordersApi';
-import { OrderRow } from './orders.types';
+import { useGetAllOrderQuery, OrderItem } from '../../features/shop/orderApi';
 import { baseURL } from '../../utils/BaseURL';
 
 const Orders = () => {
-    const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [page, setPage] = useState(1);
 
@@ -21,24 +18,23 @@ const Orders = () => {
     const [detailsOpen, setDetailsOpen] = useState(false);
 
     // Unfiltered Query for fixed Stats Cards
-    const { data: statsResponse, isLoading: isStatsLoading } = useGetAllOrdersQuery();
+    const { data: statsResponse, isLoading: isStatsLoading } = useGetAllOrderQuery();
 
-    // Filtered Query for Table Data & Search
-    const { data: ordersResponse, isLoading, isFetching } = useGetAllOrdersQuery({
+    // Filtered Query for Table Data & Status Filter
+    const { data: ordersResponse, isLoading } = useGetAllOrderQuery({
         page,
         status: statusFilter,
-        searchTerm: search,
     });
 
-    const allOrdersList: OrderRow[] = statsResponse?.data || [];
-    const ordersList: OrderRow[] = ordersResponse?.data || [];
+    const allOrdersList: OrderItem[] = statsResponse?.data || [];
+    const ordersList: OrderItem[] = ordersResponse?.data || [];
     const meta = ordersResponse?.meta;
 
     // Fixed Stats Cards Computation
     const totalOrders = statsResponse?.meta?.total ?? allOrdersList.length;
-    const deliveredOrders = allOrdersList.filter(o => o.status?.toLowerCase() === 'delivered').length;
-    const rejectedOrders = allOrdersList.filter(o => o.status?.toLowerCase() === 'rejected').length;
-    const paidOrders = allOrdersList.filter(o => o.paymentStatus?.toLowerCase() === 'paid').length;
+    const completedOrders = allOrdersList.filter(o => ['completed', 'delivered'].includes(o.status?.toLowerCase())).length;
+    const pendingOrders = allOrdersList.filter(o => ['pending', 'processing'].includes(o.status?.toLowerCase())).length;
+    const totalRevenue = allOrdersList.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 
     const pageSize = meta?.limit || 10;
     const totalItems = meta?.total ?? ordersList.length;
@@ -49,17 +45,50 @@ const Orders = () => {
     };
 
     const stats = [
-        { label: 'Total Orders', value: totalOrders },
-        { label: 'Delivered Orders', value: deliveredOrders },
-        { label: 'Rejected Orders', value: rejectedOrders },
-        { label: 'Paid Orders', value: paidOrders }
+        { 
+            label: 'Total Orders', 
+            value: isStatsLoading ? '...' : totalOrders.toLocaleString(),
+            icon: <FiShoppingCart size={20} className="text-white" />,
+            iconBg: '#46000B',
+        },
+        { 
+            label: 'Completed Orders', 
+            value: isStatsLoading ? '...' : completedOrders.toLocaleString(),
+            icon: <FiCheckCircle size={20} className="text-[#10b981]" />,
+            iconBg: '#46000B',
+        },
+        { 
+            label: 'Pending Orders', 
+            value: isStatsLoading ? '...' : pendingOrders.toLocaleString(),
+            icon: <FiClock size={20} className="text-[#fbbf24]" />,
+            iconBg: '#46000B',
+        },
+        { 
+            label: 'Total Revenue', 
+            value: isStatsLoading ? '...' : `$${totalRevenue.toFixed(2)}`,
+            icon: <FiCreditCard size={20} className="text-[#ff4b72]" />,
+            iconBg: '#46000B',
+        }
     ];
 
     const columns = [
         {
+            title: 'Order ID',
+            dataIndex: '_id',
+            key: '_id',
+            render: (id: string) => (
+                <span 
+                    onClick={() => handleOpenDetails(id)}
+                    className="text-white/80 hover:text-[#ff4b72] text-xs font-mono font-medium cursor-pointer transition-colors"
+                >
+                    #{id.slice(-6).toUpperCase()}
+                </span>
+            ),
+        },
+        {
             title: 'Ordered Item',
             key: 'orderedItem',
-            render: (record: OrderRow) => {
+            render: (record: OrderItem) => {
                 const firstItem = record.productList?.[0];
                 const prod = firstItem?.productId;
                 const prodName = prod?.name || 'Ordered Product';
@@ -79,10 +108,13 @@ const Orders = () => {
                                 src={imageUrl} 
                                 alt={prodName} 
                                 className="w-11 h-11 rounded-xl object-cover bg-white/5 border border-white/10 shrink-0" 
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/vite.svg';
+                                }}
                             />
                         ) : (
-                            <div className="w-11 h-11 rounded-xl bg-[#ff4b72]/20 border border-[#ff4b72]/30 flex items-center justify-center text-[#ff4b72] font-bold text-xs shrink-0">
-                                🛍️
+                            <div className="w-11 h-11 rounded-xl bg-[#ff4b72]/20 border border-[#ff4b72]/30 flex items-center justify-center text-[#ff4b72] shrink-0">
+                                <FiBox size={18} />
                             </div>
                         )}
                         <div className="max-w-[240px]">
@@ -107,6 +139,33 @@ const Orders = () => {
                     ${(val ?? 0).toFixed(2)}
                 </span>
             )
+        },
+        {
+            title: 'Order Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (status: string) => {
+                const st = (status || '').toLowerCase();
+                const isCompleted = st === 'completed' || st === 'delivered';
+                const isProcessing = st === 'processing';
+                const isRejected = st === 'rejected' || st === 'cancelled';
+
+                return (
+                    <span 
+                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${
+                            isCompleted
+                                ? 'bg-green-500/15 text-[#10b981] border border-green-500/20' 
+                                : isProcessing
+                                ? 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
+                                : isRejected
+                                ? 'bg-red-500/15 text-[#ef4444] border border-red-500/20'
+                                : 'bg-amber-500/15 text-[#fbbf24] border border-amber-500/20'
+                        }`}
+                    >
+                        {status || 'Pending'}
+                    </span>
+                );
+            }
         },
         {
             title: 'Payment Status',
@@ -140,29 +199,6 @@ const Orders = () => {
             }
         },
         {
-            title: 'Order Status',
-            dataIndex: 'status',
-            key: 'status',
-            render: (status: string) => {
-                const st = (status || '').toLowerCase();
-                return (
-                    <span 
-                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${
-                            st === 'delivered' 
-                                ? 'bg-green-500/15 text-[#10b981] border border-green-500/20' 
-                                : st === 'processing'
-                                ? 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
-                                : st === 'rejected'
-                                ? 'bg-red-500/15 text-[#ef4444] border border-red-500/20'
-                                : 'bg-amber-500/15 text-[#fbbf24] border border-amber-500/20'
-                        }`}
-                    >
-                        {status}
-                    </span>
-                );
-            }
-        },
-        {
             title: 'Date',
             dataIndex: 'orderDate',
             key: 'orderDate',
@@ -175,14 +211,15 @@ const Orders = () => {
         {
             title: 'Actions',
             key: 'actions',
-            render: (record: OrderRow) => (
+            render: (record: OrderItem) => (
                 <div className="flex items-center gap-3">
-                    <FiEye 
-                        className="text-[#38bdf8] hover:text-[#7dd3fc] cursor-pointer" 
-                        size={18} 
-                        title="View Order Details"
+                    <button
                         onClick={() => handleOpenDetails(record._id)}
-                    />
+                        className="p-2 rounded-lg bg-white/5 hover:bg-[#ff4b72]/20 text-[#ff4b72] transition-colors border border-white/10 cursor-pointer"
+                        title="View Order Details"
+                    >
+                        <FiEye size={16} />
+                    </button>
                 </div>
             )
         }
@@ -190,21 +227,29 @@ const Orders = () => {
 
     return (
         <div className="space-y-6 pb-6 relative">
-            <PageHeader title="Order Management" subtitle="Manage all customer and gift orders" />
+            <PageHeader title="Order Management" subtitle="Manage all customer and store orders" />
 
             {/* Stats Cards Section (Fixed & Unfiltered) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
                     <div 
                         key={idx} 
-                        className="rounded-2xl p-6 flex flex-col justify-center transition-all duration-300 hover:scale-[1.02]"
+                        className="rounded-2xl p-6 flex items-center justify-between transition-all duration-300 hover:scale-[1.02]"
                         style={{
                             background: 'rgba(255, 255, 255, 0.04)',
                             border: '1px solid rgba(255, 255, 255, 0.08)'
                         }}
                     >
-                        <span className="text-white/60 text-sm font-medium">{stat.label}</span>
-                        <h2 className="text-white text-4xl font-bold mt-2 font-sans">{isStatsLoading ? '...' : stat.value}</h2>
+                        <div>
+                            <span className="text-white/60 text-sm font-medium tracking-wide">{stat.label}</span>
+                            <h2 className="text-white text-3xl font-bold mt-2 font-sans">{stat.value}</h2>
+                        </div>
+                        <div 
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/10 shadow-sm"
+                            style={{ backgroundColor: stat.iconBg }}
+                        >
+                            {stat.icon}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -217,15 +262,7 @@ const Orders = () => {
                     border: '1px solid rgba(255, 255, 255, 0.08)'
                 }}
             >
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <Search 
-                        value={search}
-                        onChange={(val) => {
-                            setSearch(val);
-                            setPage(1);
-                        }}
-                        placeholder="Search orders..."
-                    />
+                <div className="flex justify-end items-center">
                     <CustomSelect 
                         value={statusFilter}
                         onChange={(val) => {
@@ -234,16 +271,18 @@ const Orders = () => {
                         }}
                         options={[
                             { value: 'All', label: 'All Status' },
+                            { value: 'completed', label: 'Completed' },
                             { value: 'delivered', label: 'Delivered' },
-                            { value: 'rejected', label: 'Rejected' },
-                            { value: 'pending', label: 'Pending' }
+                            { value: 'pending', label: 'Pending' },
+                            { value: 'processing', label: 'Processing' },
+                            { value: 'rejected', label: 'Rejected' }
                         ]}
                         className="w-40"
                     />
                 </div>
 
                 <div className="overflow-x-auto relative">
-                    {isLoading || isFetching ? (
+                    {isLoading  ? (
                         <LoadingSpinner text="Loading orders..." />
                     ) : ordersList.length === 0 ? (
                         <div className="py-16 text-center text-white/50 text-base">

@@ -34,7 +34,7 @@ const Advertisement = () => {
     const pageSize = 6;
 
     // RTK Query Hooks
-    const { data: adResponse, isLoading, isFetching } = useGetAllAdvertisementQuery({ page, limit: pageSize, status: activeTab === 'pending' ? 'pending' : 'approved' });
+    const { data: adResponse, isLoading } = useGetAllAdvertisementQuery({ page, limit: pageSize, status: activeTab === 'pending' ? 'pending' : 'approved' });
     const [updateAdvertisement, { isLoading: isUpdating }] = useUpdateAdvertisementMutation();
 
     const adData = adResponse?.data;
@@ -193,7 +193,7 @@ const Advertisement = () => {
                     />
 
                     <div className="overflow-x-auto relative">
-                        {isLoading || isFetching ? (
+                        {isLoading ? (
                             <LoadingSpinner text="Loading active campaigns..." />
                         ) : filteredList.length === 0 ? (
                             <EmptyData message="No active campaigns found." />
@@ -223,7 +223,7 @@ const Advertisement = () => {
                     />
 
                     <div className="overflow-x-auto relative">
-                        {isLoading || isFetching ? (
+                        {isLoading ? (
                             <LoadingSpinner text="Loading pending campaigns..." />
                         ) : filteredList.length === 0 ? (
                             <EmptyData message="No pending campaigns found." />

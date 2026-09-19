@@ -11,7 +11,7 @@ const EditProfile: React.FC = () => {
     const [imgURL, setImgURL] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    const { data: profileResponse, isLoading, isFetching } = useGetMyProfileQuery();
+    const { data: profileResponse, isLoading } = useGetMyProfileQuery();
     const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
     const profileData = profileResponse?.data?.result;
@@ -77,7 +77,7 @@ const EditProfile: React.FC = () => {
         }
     };
 
-    if (isLoading || isFetching) {
+    if (isLoading) {
         return (
             <div className="py-12">
                 <LoadingSpinner text="Loading profile details..." />

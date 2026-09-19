@@ -7,12 +7,14 @@ import {
     FiBox,
     FiCreditCard,
     FiGift,
-    FiHeadphones
+    FiHeadphones,
+    FiPieChart,
 } from 'react-icons/fi';
 import { PiStorefront, PiUsersThree } from 'react-icons/pi';
 import { MdOutlineCampaign } from 'react-icons/md';
 import { BiCategory } from 'react-icons/bi';
 import { TSidebarItem } from './generateSidebarItems';
+import { SiHoppscotch } from 'react-icons/si';
 
 const sidebarItems: TSidebarItem[] = [
     {
@@ -28,22 +30,35 @@ const sidebarItems: TSidebarItem[] = [
         icon: <FiUsers size={20} />,
     },
     {
+        key: 'shop',
+        label: 'Shop',
+        icon: <SiHoppscotch size={20} />,
+        children: [
+            {
+                key: 'shop-overview',
+                label: 'Overview',
+                path: 'shop/overview',
+                icon: <FiPieChart size={18} />,
+            },
+            {
+                key: 'orders',
+                label: 'Order',
+                path: 'orders',
+                icon: <FiShoppingCart size={18} />,
+            },
+            {
+                key: 'products',
+                label: 'Product',
+                path: 'products',
+                icon: <FiBox size={18} />,
+            },
+        ],
+    },
+    {
         key: 'vendors',
         label: 'Vendors',
         path: 'vendors',
         icon: <PiStorefront size={20} />,
-    },
-    {
-        key: 'orders',
-        label: 'Orders',
-        path: 'orders',
-        icon: <FiShoppingCart size={20} />,
-    },
-    {
-        key: 'products',
-        label: 'Products',
-        path: 'products',
-        icon: <FiBox size={20} />,
     },
     {
         key: 'category',

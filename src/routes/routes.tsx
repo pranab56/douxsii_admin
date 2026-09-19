@@ -23,6 +23,7 @@ import WalletPayments from '../pages/payments/WalletPayments';
 import Gifts from '../pages/gifts/Gifts';
 import Chats from '../pages/chats/Chats';
 import Category from '../pages/category/Category';
+import ShopOverview from '../pages/shop/ShopOverview';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
             { path: '', element: <Dashboard /> },
             { path: 'users', element: <Users /> },
             { path: 'vendors', element: <Vendors /> },
+            { path: 'shop', element: <ShopOverview /> },
+            { path: 'shop/overview', element: <ShopOverview /> },
+            { path: 'shop/orders', element: <Orders /> },
+            { path: 'shop/products', element: <Products /> },
             { path: 'orders', element: <Orders /> },
             { path: 'products', element: <Products /> },
             { path: 'category', element: <Category /> },

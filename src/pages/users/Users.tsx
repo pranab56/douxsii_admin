@@ -34,7 +34,7 @@ const Users = () => {
     const { data: statsResponse } = useGetAllUsersQuery({ role: 'user' });
 
     // API Query specifically for role='user' with search and status filter
-    const { data: usersResponse, isLoading, isFetching } = useGetAllUsersQuery({
+    const { data: usersResponse, isLoading } = useGetAllUsersQuery({
         role: 'user',
         status: statusFilter,
         searchTerm: search,
@@ -222,7 +222,7 @@ const Users = () => {
                 </div>
 
                 <div className="overflow-x-auto relative">
-                    {isLoading || isFetching ? (
+                    {isLoading  ? (
                         <LoadingSpinner text="Loading users..." />
                     ) : dataSource.length === 0 ? (
                         <div className="py-16 text-center text-white/50 text-base">

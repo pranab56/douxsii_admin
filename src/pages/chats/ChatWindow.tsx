@@ -17,7 +17,7 @@ export const ChatWindow = ({ selectedChat }: ChatWindowProps) => {
     useChatSocket(selectedChat?._id);
 
     // Fetch messages for selected chatId
-    const { data: messagesResponse, isLoading, isFetching } = useGetMessageByChatIdQuery(
+    const { data: messagesResponse, isLoading } = useGetMessageByChatIdQuery(
         { chatId: selectedChat?._id || '' },
         { skip: !selectedChat?._id }
     );
@@ -92,7 +92,7 @@ export const ChatWindow = ({ selectedChat }: ChatWindowProps) => {
 
             {/* Messages Scroll Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-black/10">
-                {isLoading || isFetching ? (
+                {isLoading ? (
                     <div className="py-12">
                         <LoadingSpinner text="Loading conversation history..." />
                     </div>

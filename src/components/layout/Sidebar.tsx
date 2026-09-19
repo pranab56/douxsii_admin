@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ConfigProvider, Layout, Menu, MenuProps } from 'antd';
 import { TSidebarItem } from '../../utils/generateSidebarItems';
 import sidebarItems from '../../utils/sidebarItems';
@@ -16,6 +16,16 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const [openKeys, setOpenKeys] = useState<string[]>(['shop']);
+
+    useEffect(() => {
+        const isShopChildRoute = ['/shop', '/orders', '/products'].some(
+            (p) => location.pathname === p || location.pathname.startsWith(p + '/')
+        );
+        if (isShopChildRoute) {
+            setOpenKeys((prev) => (prev.includes('shop') ? prev : [...prev, 'shop']));
+        }
+    }, [location.pathname]);
 
     const handleOpenLogoutModal = () => {
         setIsLogoutModalOpen(true);
@@ -36,12 +46,35 @@ const Sidebar = () => {
     };
 
     const sidebarItemsGenerator = (items: TSidebarItem[]): MenuProps['items'] => {
-        return items.map((item) => ({
-            key: item.path === '' ? '/' : `/${item.path}`,
-            icon: item.icon,
-            label: <Link to={item.path === '' ? '/' : `/${item.path}`}>{item.label}</Link>,
-        }));
+        return items.map((item) => {
+            if (item.children && item.children.length > 0) {
+                return {
+                    key: item.key,
+                    icon: item.icon,
+                    label: item.label,
+                    children: item.children.map((child) => {
+                        const childPath = child.path === '' ? '/' : `/${child.path}`;
+                        return {
+                            key: childPath,
+                            icon: child.icon,
+                            label: <Link to={childPath}>{child.label}</Link>,
+                        };
+                    }),
+                };
+            }
+            const itemPath = item.path === '' ? '/' : `/${item.path}`;
+            return {
+                key: itemPath,
+                icon: item.icon,
+                label: <Link to={itemPath}>{item.label}</Link>,
+            };
+        });
     };
+
+    let selectedKey = location.pathname;
+    if (selectedKey === '/shop') selectedKey = '/shop/overview';
+    if (selectedKey === '/shop/orders') selectedKey = '/orders';
+    if (selectedKey === '/shop/products') selectedKey = '/products';
 
     return (
         <ConfigProvider
@@ -58,6 +91,7 @@ const Sidebar = () => {
                         itemSelectedColor: '#ffffff',
                         itemSelectedBg: 'rgba(255, 255, 255, 0.15)',
                         itemActiveBg: 'rgba(255, 255, 255, 0.15)',
+                        subMenuItemBg: 'transparent',
                         itemBorderRadius: 8,
                         itemHeight: 40,
                         itemMarginBlock: 4,
@@ -104,7 +138,9 @@ const Sidebar = () => {
                         <Menu
                             theme="light"
                             mode="inline"
-                            selectedKeys={[location.pathname]}
+                            selectedKeys={[selectedKey]}
+                            openKeys={openKeys}
+                            onOpenChange={(keys) => setOpenKeys(keys)}
                             items={sidebarItemsGenerator(sidebarItems)}
                             style={{ borderRight: 0, background: 'transparent' }}
                         />
