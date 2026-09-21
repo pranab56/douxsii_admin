@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { getToken } from '../utils/storage';
 import { getFromLocalStorage } from '../utils/localStorage';
+import { isTokenValid, clearAuthSession } from '../utils/auth';
+import { logout } from '../features/auth/authSlice';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -10,12 +12,19 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
+  const dispatch = useAppDispatch();
   const tokenFromRedux = useAppSelector((state) => state.auth.token);
   const tokenFromStorage = getToken() || getFromLocalStorage('accessToken');
 
   const token = tokenFromRedux || tokenFromStorage;
+  const isValid = isTokenValid(token);
 
-  if (!token) {
+  if (!isValid) {
+    if (token) {
+      // Purge invalid or expired token
+      dispatch(logout());
+      clearAuthSession();
+    }
     // Redirect unauthenticated user to /login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

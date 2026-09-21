@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Modal, Form, ConfigProvider } from 'antd';
+import { Modal, Form, Select, ConfigProvider } from 'antd';
+import { FiChevronDown } from 'react-icons/fi';
 import ModalHeader from './ModalHeader';
 import { FormInput } from './FormInput';
 import { getLoadingText } from '../../utils/loadingText';
@@ -10,7 +11,7 @@ interface CategoryModalProps {
     editingCategory: CategoryItem | null;
     isSubmitting?: boolean;
     onClose: () => void;
-    onSubmit: (values: { name: string }) => void;
+    onSubmit: (values: { name: string; type: string }) => void;
 }
 
 export const CategoryModal = ({
@@ -26,8 +27,14 @@ export const CategoryModal = ({
         if (open) {
             form.setFieldsValue(
                 editingCategory
-                    ? { name: editingCategory.name }
-                    : { name: '' }
+                    ? {
+                        name: editingCategory.name,
+                        type: editingCategory.type || 'flower'
+                    }
+                    : {
+                        name: '',
+                        type: 'flower'
+                    }
             );
         }
     }, [open, editingCategory, form]);
@@ -75,6 +82,17 @@ export const CategoryModal = ({
                             colorText: '#ffffff',
                             colorTextPlaceholder: '#b7868b',
                         },
+                        Select: {
+                            colorBgContainer: '#560e18',
+                            colorBgElevated: '#46000B',
+                            colorText: '#ffffff',
+                            colorTextPlaceholder: '#b7868b',
+                            colorBorder: '#7a101b',
+                            colorPrimaryHover: '#b02636',
+                            colorPrimary: '#b02636',
+                            selectorBg: '#560e18',
+                            optionSelectedBg: 'rgba(255, 75, 114, 0.2)',
+                        },
                         Form: {
                             labelColor: '#ffffff',
                         },
@@ -99,6 +117,40 @@ export const CategoryModal = ({
                             placeholder="e.g. Tulips, Roses, Lilies..."
                             rules={[{ required: true, message: 'Please enter category name!' }]}
                         />
+
+                        <Form.Item
+                            name="type"
+                            label={<span className="text-white text-sm font-medium">Category Type</span>}
+                            rules={[{ required: true, message: 'Please select category type!' }]}
+                            initialValue="flower"
+                        >
+                            <Select
+                                className="w-full h-11"
+                                placeholder="Select category type"
+                                suffixIcon={<FiChevronDown className="text-white/60" size={16} />}
+                                popupMatchSelectWidth={false}
+                                dropdownStyle={{
+                                    background: 'linear-gradient(135deg, #46000B, #2d0007)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: 12,
+                                    padding: '6px',
+                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
+                                }}
+                            >
+                                <Select.Option value="flower">
+                                    <div className="flex items-center gap-2 py-0.5">
+                                        <span className="text-base">🌸</span>
+                                        <span className="font-medium text-white">Flower</span>
+                                    </div>
+                                </Select.Option>
+                                <Select.Option value="other">
+                                    <div className="flex items-center gap-2 py-0.5">
+                                        <span className="text-base">📦</span>
+                                        <span className="font-medium text-white">Other</span>
+                                    </div>
+                                </Select.Option>
+                            </Select>
+                        </Form.Item>
 
                         <div className="flex items-center gap-3 pt-3">
                             <button

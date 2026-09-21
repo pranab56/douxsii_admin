@@ -146,23 +146,26 @@ const Orders = () => {
             key: 'status',
             render: (status: string) => {
                 const st = (status || '').toLowerCase();
-                const isCompleted = st === 'completed' || st === 'delivered';
-                const isProcessing = st === 'processing';
+                const isAccepted = st === 'accepted';
                 const isRejected = st === 'rejected' || st === 'cancelled';
+                const isCompleted = st === 'completed';
+                const isProcessing = st === 'processing' || st === 'delivered';
 
                 return (
                     <span 
                         className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${
-                            isCompleted
-                                ? 'bg-green-500/15 text-[#10b981] border border-green-500/20' 
-                                : isProcessing
+                            isAccepted
+                                ? 'bg-emerald-500/15 text-[#10b981] border border-emerald-500/20' 
+                                : isCompleted
                                 ? 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
+                                : isProcessing
+                                ? 'bg-purple-500/15 text-[#a855f7] border border-purple-500/20'
                                 : isRejected
                                 ? 'bg-red-500/15 text-[#ef4444] border border-red-500/20'
                                 : 'bg-amber-500/15 text-[#fbbf24] border border-amber-500/20'
                         }`}
                     >
-                        {status || 'Pending'}
+                        {status || 'Completed'}
                     </span>
                 );
             }

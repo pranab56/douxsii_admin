@@ -91,6 +91,17 @@ export const ordersApi = baseApi.injectEndpoints({
             },
             providesTags: ["orders"],
         }),
+
+        updateStatus: builder.mutation<{ success: boolean; message: string; data?: any }, { id: string; status: string }>({
+            query: ({ id, status }: { id: string; status: string }) => {
+                return {
+                    url: `/order/${id}?status=${status}`,
+                    method: "PATCH",
+                };
+            },
+            invalidatesTags: ["orders"],
+        }),
+
     }),
 });
 
@@ -98,4 +109,5 @@ export const ordersApi = baseApi.injectEndpoints({
 export const {
     useGetAllOrdersQuery,
     useSingleOrderQuery,
+    useUpdateStatusMutation,
 } = ordersApi;

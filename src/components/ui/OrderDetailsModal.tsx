@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Modal } from 'antd';
-import { FiUser, FiShoppingBag, FiMapPin, FiCreditCard, FiGift } from 'react-icons/fi';
+import { FiUser, FiShoppingBag, FiMapPin, FiCreditCard, FiGift, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 import ModalHeader from './ModalHeader';
 import InfoBlock from './InfoBlock';
-import { useGetSingleOrderQuery } from '../../features/shop/orderApi';
+import ConfirmModal from './ConfirmModal';
+import { useGetSingleOrderQuery, useUpdateStatusMutation } from '../../features/shop/orderApi';
 import LoadingSpinner from './LoadingSpinner';
 import { baseURL } from '../../utils/BaseURL';
 
@@ -16,6 +19,8 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
     const { data: singleOrderResponse, isLoading } = useGetSingleOrderQuery(orderId || '', {
         skip: !open || !orderId,
     });
+    const [updateStatus, { isLoading: isUpdatingStatus }] = useUpdateStatusMutation();
+    const [confirmAction, setConfirmAction] = useState<'accepted' | 'rejected' | null>(null);
 
     if (!orderId) return null;
 
@@ -30,6 +35,13 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
     const products = orderData?.productList || [];
     const mainProductName = products[0]?.productId?.name || 'Order Item Details';
 
+    const rawStatus = (orderData?.status || '').toLowerCase();
+    const isAccepted = rawStatus === 'accepted';
+    const isRejected = rawStatus === 'rejected';
+    // Action has been taken ONLY if status is 'accepted' or 'rejected' (or cancelled)
+    // Default incoming orders have status 'completed' (or 'pending'), where Admin CAN take action!
+    const isActionTaken = isAccepted || isRejected || rawStatus === 'cancelled';
+
     // Address construction
     const address = [
         orderData?.address_line1,
@@ -40,6 +52,28 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
     ].filter(Boolean).join(', ') || 'No address provided';
 
     const phone = orderData?.phone_number || 'N/A';
+
+    const handleConfirmAction = async () => {
+        if (!confirmAction || !orderId || isActionTaken) return;
+        const target = confirmAction;
+        try {
+            const res = await updateStatus({ id: orderId, status: target }).unwrap();
+            toast.success(res?.message || `Order status updated to ${target} successfully!`);
+            setConfirmAction(null);
+        } catch (err: any) {
+            const errorMsg =
+                err?.data?.message ||
+                err?.data?.errorSources?.[0]?.message ||
+                err?.message ||
+                'Failed to update order status';
+            toast.error(errorMsg);
+        }
+    };
+
+    const handleCancelConfirm = () => {
+        if (isUpdatingStatus) return;
+        setConfirmAction(null);
+    };
 
     return (
         <Modal
@@ -82,11 +116,11 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                 <div className="flex items-center gap-2 mt-2">
                                     <span 
                                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider inline-block ${
-                                            statusText.toLowerCase() === 'delivered' 
+                                            isAccepted
                                                 ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
                                                 : statusText.toLowerCase() === 'processing'
                                                 ? 'bg-blue-500/10 text-[#38bdf8] border border-blue-500/20'
-                                                : statusText.toLowerCase() === 'rejected'
+                                                : isRejected
                                                 ? 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
                                                 : 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
                                         }`}
@@ -203,10 +237,61 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                     />
                                 )}
                             </div>
+
+                            {/* Accept & Reject Actions or Finalized Status Message */}
+                            <div className="pt-4 border-t border-white/10">
+                                {isActionTaken ? (
+                                    <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                                        <span className="text-sm">🔒</span>
+                                        <span className="text-white/60 text-sm font-medium">
+                                            Status is finalized as <strong className="capitalize text-white font-semibold">{statusText}</strong>. No further action can be taken.
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setConfirmAction('accepted')}
+                                            disabled={isUpdatingStatus}
+                                            className="w-full sm:flex-1 h-11 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border-0 outline-none bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white shadow-lg shadow-emerald-900/30 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                                        >
+                                            <FiCheckCircle size={16} />
+                                            <span>Accept Order</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setConfirmAction('rejected')}
+                                            disabled={isUpdatingStatus}
+                                            className="w-full sm:flex-1 h-11 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border-0 outline-none bg-red-500/15 hover:bg-red-500/25 active:scale-95 text-red-400 border border-red-500/30 hover:border-red-500/50 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                                        >
+                                            <FiXCircle size={16} />
+                                            <span>Reject Order</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </>
                 )}
             </div>
+
+            {/* Permanent Action Confirmation Modal */}
+            <ConfirmModal
+                open={confirmAction !== null}
+                title={confirmAction === 'accepted' ? 'Accept This Order?' : 'Reject This Order?'}
+                description={
+                    confirmAction === 'accepted'
+                        ? 'WARNING: This action is PERMANENT. Once accepted, it cannot be undone, cancelled, or rejected later. Are you sure you want to proceed?'
+                        : 'WARNING: This action is PERMANENT. Once rejected, it cannot be undone or accepted later. Are you sure you want to proceed?'
+                }
+                type={confirmAction === 'accepted' ? 'success' : 'danger'}
+                confirmText={confirmAction === 'accepted' ? 'Yes, Accept' : 'Yes, Reject'}
+                loadingText={confirmAction === 'accepted' ? 'Accepting...' : 'Rejecting...'}
+                isLoading={isUpdatingStatus}
+                onConfirm={handleConfirmAction}
+                onCancel={handleCancelConfirm}
+            />
         </Modal>
     );
 };

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getToken, removeToken, saveToken } from "../../utils/storage";
+import { saveToken } from "../../utils/storage";
+import { clearAuthSession, getValidAuthToken } from "../../utils/auth";
 
 export interface AuthState {
   token: string | null;
@@ -31,7 +32,7 @@ const getPermissionsReady = (): boolean => {
 };
 
 const initialState: AuthState = {
-  token: typeof window !== "undefined" ? getToken() : null,
+  token: typeof window !== "undefined" ? getValidAuthToken() : null,
   role: getStoredRole(),
   permissions: getStoredPermissions(),
   permissionsReady: getPermissionsReady(),
@@ -61,9 +62,7 @@ const authSlice = createSlice({
       state.role = null;
       state.permissions = [];
       state.permissionsReady = false;
-      removeToken();
-      localStorage.removeItem("role");
-      localStorage.removeItem("permissions");
+      clearAuthSession();
     },
   },
 });

@@ -101,12 +101,23 @@ export const orderApi = baseApi.injectEndpoints({
             providesTags: ["order"],
         }),
 
+        updateStatus: builder.mutation({
+            query: ({ id, status }: { id: string, status: string }) => {
+                return {
+                    url: `/order/${id}?status=${status}`, // accepted || rejected
+                    method: "PATCH",
+                };
+            },
+            invalidatesTags: ["order"],
+        }),
+
     }),
 });
 
 // Export hooks
 export const {
     useGetAllOrderQuery,
-    useGetSingleOrderQuery
+    useGetSingleOrderQuery,
+    useUpdateStatusMutation
 } = orderApi;
 

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import App from '../App';
 import Login from '../pages/auth/Login';
 import ForgetPassword from '../pages/auth/ForgetPassword';
@@ -92,6 +92,10 @@ const router = createBrowserRouter([
                 <NewPassword />
             </PublicRoute>
         ),
+    },
+    {
+        path: '*',
+        element: <Navigate to="/" replace />,
     },
 ]);
 

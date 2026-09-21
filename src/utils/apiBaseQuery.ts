@@ -28,12 +28,16 @@ const baseQueryWithReauth: BaseQueryFn<
   const result = await rawBaseQuery(args, api, extraOptions);
 
   const url = typeof args === "string" ? args : args?.url;
-  const isAuthEndpoint = url?.startsWith("/");
+  const isAuthEndpoint =
+    url?.includes("/auth/login") ||
+    url?.includes("/auth/forgot") ||
+    url?.includes("/verify-otp") ||
+    url?.includes("/resend-otp");
 
   if (result.error?.status === 401 && !isAuthEndpoint) {
     api.dispatch(logout());
     api.dispatch(baseApi.util.resetApiState());
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
       window.location.href = "/login";
     }
   }

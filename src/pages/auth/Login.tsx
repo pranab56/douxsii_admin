@@ -1,5 +1,5 @@
 import { Button, Checkbox, Form } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { setToLocalStorage } from '../../utils/localStorage';
 import { FormInput } from '../../components/ui/FormInput';
@@ -11,8 +11,11 @@ import { saveToken } from '../../utils/storage';
 
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useAppDispatch();
     const [login, { isLoading }] = useLoginMutation();
+
+    const from = (location.state as any)?.from?.pathname || '/';
 
     const onFinish = async (values: { email: string; password: string }) => {
         try {
@@ -45,7 +48,7 @@ const Login = () => {
                     timer: 1200,
                     showConfirmButton: false,
                 }).then(() => {
-                    navigate("/");
+                    navigate(from, { replace: true });
                 });
             } else {
                 Swal.fire({

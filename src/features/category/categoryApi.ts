@@ -3,6 +3,7 @@ import { baseApi } from "../../utils/apiBaseQuery";
 export interface CategoryItem {
     _id: string;
     name: string;
+    type?: "flower" | "other" | string;
     image?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -28,19 +29,24 @@ export interface SingleCategoryApiResponse {
 
 export const categoryApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAllCategory: builder.query<CategoryApiResponse, { page?: number; limit?: number; searchTerm?: string } | number | void>({
+        getAllCategory: builder.query<CategoryApiResponse, { page?: number; limit?: number; searchTerm?: string; type?: string } | number | void>({
             query: (arg) => {
                 let pageNumber = 1;
                 let searchTerm = '';
+                let type = '';
                 if (typeof arg === 'number') {
                     pageNumber = arg;
                 } else if (arg && typeof arg === 'object') {
                     pageNumber = arg.page || 1;
                     searchTerm = arg.searchTerm || '';
+                    type = arg.type || '';
                 }
                 let url = `/category?page=${pageNumber}`;
                 if (searchTerm) {
                     url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+                }
+                if (type && type !== 'all') {
+                    url += `&type=${encodeURIComponent(type)}`;
                 }
                 return {
                     url,
@@ -60,7 +66,7 @@ export const categoryApi = baseApi.injectEndpoints({
             providesTags: ["category"],
         }),
 
-        createCategory: builder.mutation<SingleCategoryApiResponse, { name: string } | FormData>({
+        createCategory: builder.mutation<SingleCategoryApiResponse, { name: string; type?: string } | FormData>({
             query: (data) => {
                 return {
                     url: `/category/create`,
@@ -71,7 +77,7 @@ export const categoryApi = baseApi.injectEndpoints({
             invalidatesTags: ["category"],
         }),
 
-        updateCategory: builder.mutation<SingleCategoryApiResponse, { id: string; data: { name: string } | FormData }>({
+        updateCategory: builder.mutation<SingleCategoryApiResponse, { id: string; data: { name: string; type?: string } | FormData }>({
             query: ({ id, data }) => {
                 return {
                     url: `/category/${id}`,

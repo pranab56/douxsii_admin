@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getFromLocalStorage } from '../utils/localStorage';
+import { getToken } from '../utils/storage';
+import { isTokenValid } from '../utils/auth';
 
 export type User = {
   email: string;
@@ -23,8 +25,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | undefined>(undefined);
 
   useEffect(() => {
-    const token = getFromLocalStorage("accessToken");
-    if (token) {
+    const token = getToken() || getFromLocalStorage("accessToken");
+    if (token && isTokenValid(token)) {
       const localUserStr = getFromLocalStorage("userData");
       if (localUserStr) {
         try {

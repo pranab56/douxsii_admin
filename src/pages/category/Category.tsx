@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import PageHeader from '../../components/ui/PageHeader';
 import Pagination from '../../components/ui/Pagination';
 import Search from '../../components/ui/Search';
+import CustomSelect from '../../components/ui/CustomSelect';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import CategoryModal from '../../components/ui/CategoryModal';
@@ -21,6 +22,7 @@ import { baseURL } from '../../utils/BaseURL';
 const Category = () => {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
+    const [selectedType, setSelectedType] = useState('all');
 
     // Modal States
     const [modalOpen, setModalOpen] = useState(false);
@@ -31,16 +33,21 @@ const Category = () => {
     // RTK Query Hooks
     const { data: categoryResponse, isLoading } = useGetAllCategoryQuery({
         page,
-        searchTerm: search
+        searchTerm: search,
+        type: selectedType === 'all' ? undefined : selectedType
     });
     const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
     const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
     const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
 
-    const categoryList: CategoryItem[] = categoryResponse?.data || [];
+    const rawCategoryList: CategoryItem[] = categoryResponse?.data || [];
+    const categoryList = rawCategoryList.filter((item) => {
+        if (selectedType === 'all') return true;
+        return item.type?.toLowerCase() === selectedType.toLowerCase();
+    });
     const meta = categoryResponse?.meta;
     const pageSize = meta?.limit || 10;
-    const totalItems = meta?.total ?? categoryList.length;
+    const totalItems = selectedType === 'all' ? (meta?.total ?? rawCategoryList.length) : categoryList.length;
 
     const getImageUrl = (url?: string) => {
         if (!url) return '';
@@ -78,18 +85,22 @@ const Category = () => {
         }
     };
 
-    const handleSubmit = async (values: { name: string }) => {
+    const handleSubmit = async (values: { name: string; type: string }) => {
         try {
+            const formData = new FormData();
+            formData.append('name', values.name);
+            if (values.type) {
+                formData.append('type', values.type);
+            }
+
             if (editingCategory) {
                 const res = await updateCategory({
                     id: editingCategory._id,
-                    data: { name: values.name }
+                    data: formData
                 }).unwrap();
                 toast.success(res?.message || 'Category updated successfully');
             } else {
-                const res = await createCategory({
-                    name: values.name
-                }).unwrap();
+                const res = await createCategory(formData).unwrap();
                 toast.success(res?.message || 'Category created successfully');
             }
             setModalOpen(false);
@@ -116,24 +127,43 @@ const Category = () => {
                 }
             />
 
-            {/* Top Bar: Search & Category Stats Counter */}
+            {/* Top Bar: Search, Type Filter & Category Stats Counter */}
             <div
-                className="p-5 rounded-2xl flex flex-col sm:flex-row gap-4 justify-between items-center"
+                className="p-5 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center"
                 style={{
                     background: 'rgba(255, 255, 255, 0.04)',
                     border: '1px solid rgba(255, 255, 255, 0.08)'
                 }}
             >
-                <Search
-                    value={search}
-                    onChange={(val) => {
-                        setSearch(val);
-                        setPage(1);
-                    }}
-                    placeholder="Search category by name..."
-                />
+                <div className="flex flex-col sm:flex-row items-center gap-3 flex-1 max-w-xl">
+                    <Search
+                        value={search}
+                        onChange={(val) => {
+                            setSearch(val);
+                            setPage(1);
+                        }}
+                        placeholder="Search category by name..."
+                        className="flex-1 w-full"
+                    />
 
-                <div className="flex items-center gap-2 text-white/60 text-sm font-medium">
+                    <div className="w-full sm:w-44 shrink-0">
+                        <CustomSelect
+                            value={selectedType}
+                            onChange={(val) => {
+                                setSelectedType(val);
+                                setPage(1);
+                            }}
+                            options={[
+                                { value: 'all', label: 'All category' },
+                                { value: 'flower', label: 'Flower' },
+                                { value: 'other', label: 'Other' },
+                            ]}
+                            placeholder="Filter by type"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-white/60 text-sm font-medium self-end md:self-auto">
                     <span>Total Categories:</span>
                     <span className="px-3 py-1 rounded-full bg-[#ff4b72]/15 text-[#ff4b72] font-bold text-xs border border-[#ff4b72]/20">
                         {isLoading ? '...' : totalItems}
@@ -208,10 +238,21 @@ const Category = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mt-4">
+                                    <div className="mt-4 flex items-center justify-between gap-2">
                                         <h3 className="text-white text-base font-bold m-0 group-hover:text-[#ff4b72] transition-colors truncate">
                                             {item.name}
                                         </h3>
+                                        {item.type && (
+                                            <span
+                                                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize shrink-0 border ${
+                                                    item.type.toLowerCase() === 'flower'
+                                                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                                        : 'bg-[#ff4b72]/15 text-[#ff4b72] border-[#ff4b72]/30'
+                                                }`}
+                                            >
+                                                {item.type}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             );
