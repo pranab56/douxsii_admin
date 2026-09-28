@@ -8,6 +8,7 @@ import { useLoginMutation } from '../../features/auth/authApi';
 import { useAppDispatch } from '../../redux/hooks';
 import { setToken, setRole } from '../../features/auth/authSlice';
 import { saveToken } from '../../utils/storage';
+import { isTokenValid } from '../../utils/auth';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -15,7 +16,8 @@ const Login = () => {
     const dispatch = useAppDispatch();
     const [login, { isLoading }] = useLoginMutation();
 
-    const from = (location.state as any)?.from?.pathname || '/';
+    const rawFrom = (location.state as any)?.from?.pathname;
+    const targetPath = rawFrom && rawFrom !== '/login' ? rawFrom : '/';
 
     const onFinish = async (values: { email: string; password: string }) => {
         try {
@@ -24,15 +26,20 @@ const Login = () => {
                 password: values.password,
             }).unwrap();
 
-            if (res?.success) {
-                const accessToken = res.data?.accessToken;
-                const userData = res.data?.userData;
+            const accessToken =
+                res?.data?.accessToken ||
+                res?.data?.token ||
+                (res as any)?.accessToken ||
+                (res as any)?.token;
 
-                if (accessToken) {
-                    saveToken(accessToken);
-                    setToLocalStorage("accessToken", accessToken);
-                    dispatch(setToken(accessToken));
-                }
+            const userData = res?.data?.userData || res?.data?.user || (res as any)?.userData;
+
+            const isSuccessResponse = res?.success !== false && Boolean(accessToken);
+
+            if (isSuccessResponse && accessToken && isTokenValid(accessToken)) {
+                saveToken(accessToken);
+                setToLocalStorage("accessToken", accessToken);
+                dispatch(setToken(accessToken));
 
                 if (userData) {
                     setToLocalStorage("userData", JSON.stringify(userData));
@@ -43,24 +50,35 @@ const Login = () => {
 
                 Swal.fire({
                     title: "Login Successful",
-                    text: res.message || "Welcome to Admin Dashboard",
+                    text: res?.message || "Welcome to Admin Dashboard",
                     icon: "success",
                     timer: 1200,
                     showConfirmButton: false,
                 }).then(() => {
-                    navigate(from, { replace: true });
+                    navigate(targetPath, { replace: true });
                 });
             } else {
+                const failureMessage =
+                    res?.message ||
+                    "Invalid credentials or missing authorization token. Please try again.";
+
                 Swal.fire({
-                    title: "Error",
-                    text: res?.message || "Login failed",
+                    title: "Login Failed",
+                    text: failureMessage,
                     icon: "error",
                 });
             }
         } catch (err: any) {
+            const errorMessage =
+                err?.data?.message ||
+                err?.data?.error ||
+                err?.message ||
+                (typeof err?.data === 'string' ? err.data : null) ||
+                "Invalid email or password. Please try again.";
+
             Swal.fire({
                 title: "Login Failed",
-                text: err?.data?.message || err?.message || "Something went wrong. Please try again.",
+                text: errorMessage,
                 icon: "error",
             });
         }
