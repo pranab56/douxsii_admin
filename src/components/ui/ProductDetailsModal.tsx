@@ -3,7 +3,7 @@ import { Modal } from 'antd';
 import { FiShoppingBag, FiDollarSign, FiStar, FiUser, FiTruck, FiImage, FiPackage, FiGift } from 'react-icons/fi';
 import ModalHeader from './ModalHeader';
 import InfoBlock from './InfoBlock';
-import { useGetSingleProductQuery } from '../../features/shop/productApi';
+import { useGetSingleProductQuery } from '../../features/vendor/productApi';
 import LoadingSpinner from './LoadingSpinner';
 import { baseURL } from '../../utils/BaseURL';
 
@@ -96,9 +96,9 @@ export const ProductDetailsModal = ({ open, productId, onClose }: ProductDetails
                         <div className="flex flex-col sm:flex-row gap-4 border-b border-white/5 pb-4">
                             {activeImageUrl ? (
                                 <div className="relative w-28 h-28 rounded-2xl overflow-hidden shrink-0 border border-white/10 bg-black/30">
-                                    <img 
-                                        src={activeImageUrl} 
-                                        alt={name} 
+                                    <img
+                                        src={activeImageUrl}
+                                        alt={name}
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
                                             (e.target as HTMLImageElement).src = '/vite.svg';
@@ -118,12 +118,11 @@ export const ProductDetailsModal = ({ open, productId, onClose }: ProductDetails
                             <div className="flex flex-col justify-center flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
                                     <h3 className="text-white text-xl font-bold m-0 font-sans">{name}</h3>
-                                    <span 
-                                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
-                                            isAvailable 
-                                                ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
+                                    <span
+                                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${isAvailable
+                                                ? 'bg-green-500/10 text-[#10b981] border border-green-500/20'
                                                 : 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
-                                        }`}
+                                            }`}
                                     >
                                         {isAvailable ? 'Available' : 'Out of Sale'}
                                     </span>
@@ -166,17 +165,16 @@ export const ProductDetailsModal = ({ open, productId, onClose }: ProductDetails
                                                 key={idx}
                                                 type="button"
                                                 onClick={() => setActiveImageIndex(idx)}
-                                                className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer p-0 bg-black/40 ${
-                                                    isSelected 
-                                                        ? 'border-[#ff2150] shadow-lg shadow-[#ff2150]/30 scale-105 ring-2 ring-[#ff2150]/40' 
+                                                className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer p-0 bg-black/40 ${isSelected
+                                                        ? 'border-[#ff2150] shadow-lg shadow-[#ff2150]/30 scale-105 ring-2 ring-[#ff2150]/40'
                                                         : 'border-white/10 hover:border-white/30 opacity-70 hover:opacity-100'
-                                                }`}
+                                                    }`}
                                                 title={`View photo ${idx + 1}`}
                                             >
-                                                <img 
-                                                    src={url} 
-                                                    alt={`Product photo ${idx + 1}`} 
-                                                    className="w-full h-full object-cover" 
+                                                <img
+                                                    src={url}
+                                                    alt={`Product photo ${idx + 1}`}
+                                                    className="w-full h-full object-cover"
                                                     onError={(e) => {
                                                         (e.target as HTMLImageElement).src = '/vite.svg';
                                                     }}
@@ -195,28 +193,28 @@ export const ProductDetailsModal = ({ open, productId, onClose }: ProductDetails
                         <div className="flex flex-col gap-4">
                             {/* Vendor & Seller info */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <InfoBlock 
-                                    label="Shop / Vendor" 
-                                    icon={<FiShoppingBag size={16} />} 
-                                    value={shopName} 
+                                <InfoBlock
+                                    label="Shop / Vendor"
+                                    icon={<FiShoppingBag size={16} />}
+                                    value={shopName}
                                 />
-                                <InfoBlock 
-                                    label="Seller Info" 
-                                    icon={<FiUser size={16} />} 
+                                <InfoBlock
+                                    label="Seller Info"
+                                    icon={<FiUser size={16} />}
                                     value={
                                         <div className="mt-1">
                                             <div className="text-white text-sm font-semibold">{sellerName}</div>
                                             <div className="text-white/40 text-xs mt-0.5">{sellerEmail}</div>
                                         </div>
-                                    } 
+                                    }
                                 />
                             </div>
 
                             {/* Price, Stock, Rating */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <InfoBlock 
-                                    label="Price" 
-                                    icon={<FiDollarSign size={16} />} 
+                                <InfoBlock
+                                    label="Price"
+                                    icon={<FiDollarSign size={16} />}
                                     value={
                                         <div className="flex items-baseline gap-2 mt-1">
                                             <span className="text-2xl font-bold text-[#ff4b72] font-sans">
@@ -228,17 +226,17 @@ export const ProductDetailsModal = ({ open, productId, onClose }: ProductDetails
                                                 </span>
                                             ) : null}
                                         </div>
-                                    } 
+                                    }
                                 />
-                                <InfoBlock 
-                                    label="Available Stock" 
-                                    icon={<FiShoppingBag size={16} />} 
-                                    value={stock} 
-                                    valueClassName="text-2xl font-bold mt-1 font-sans" 
+                                <InfoBlock
+                                    label="Available Stock"
+                                    icon={<FiShoppingBag size={16} />}
+                                    value={stock}
+                                    valueClassName="text-2xl font-bold mt-1 font-sans"
                                 />
-                                <InfoBlock 
-                                    label="Rating" 
-                                    icon={<FiStar size={16} className="text-yellow-500 fill-yellow-500" />} 
+                                <InfoBlock
+                                    label="Rating"
+                                    icon={<FiStar size={16} className="text-yellow-500 fill-yellow-500" />}
                                     value={
                                         <div className="flex items-baseline justify-between w-full mt-1">
                                             <span className="text-2xl font-bold font-sans">
@@ -248,33 +246,33 @@ export const ProductDetailsModal = ({ open, productId, onClose }: ProductDetails
                                                 {reviewCount} reviews
                                             </span>
                                         </div>
-                                    } 
+                                    }
                                 />
                             </div>
 
                             {/* Delivery, Discount & Dimensions */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <InfoBlock 
-                                    label="Delivery Time" 
-                                    icon={<FiTruck size={16} />} 
-                                    value={deliveryTime} 
+                                <InfoBlock
+                                    label="Delivery Time"
+                                    icon={<FiTruck size={16} />}
+                                    value={deliveryTime}
                                 />
                                 {discount > 0 ? (
-                                    <InfoBlock 
-                                        label="Discount" 
-                                        icon={<FiDollarSign size={16} />} 
-                                        value={`${discount}% OFF`} 
-                                        valueClassName="text-green-400 font-bold mt-1" 
+                                    <InfoBlock
+                                        label="Discount"
+                                        icon={<FiDollarSign size={16} />}
+                                        value={`${discount}% OFF`}
+                                        valueClassName="text-green-400 font-bold mt-1"
                                     />
                                 ) : (
-                                    <InfoBlock 
-                                        label="Dimensions & Weight" 
-                                        icon={<FiPackage size={16} />} 
+                                    <InfoBlock
+                                        label="Dimensions & Weight"
+                                        icon={<FiPackage size={16} />}
                                         value={
                                             weight || length || width || height
                                                 ? `${weight ?? 0}g (${length ?? 0}×${width ?? 0}×${height ?? 0}cm)`
                                                 : 'Standard'
-                                        } 
+                                        }
                                     />
                                 )}
                             </div>

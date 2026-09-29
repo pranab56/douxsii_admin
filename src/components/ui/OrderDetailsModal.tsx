@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import ModalHeader from './ModalHeader';
 import InfoBlock from './InfoBlock';
 import ConfirmModal from './ConfirmModal';
-import { useGetSingleOrderQuery, useUpdateStatusMutation } from '../../features/shop/orderApi';
+import { useGetSingleOrderQuery, useUpdateStatusMutation } from '../../features/vendor/orderApi';
 import LoadingSpinner from './LoadingSpinner';
 import { baseURL } from '../../utils/BaseURL';
 
@@ -114,16 +114,15 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                     {mainProductName}
                                 </h3>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <span 
-                                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider inline-block ${
-                                            isAccepted
-                                                ? 'bg-green-500/10 text-[#10b981] border border-green-500/20' 
-                                                : statusText.toLowerCase() === 'processing'
+                                    <span
+                                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider inline-block ${isAccepted
+                                            ? 'bg-green-500/10 text-[#10b981] border border-green-500/20'
+                                            : statusText.toLowerCase() === 'processing'
                                                 ? 'bg-blue-500/10 text-[#38bdf8] border border-blue-500/20'
                                                 : isRejected
-                                                ? 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
-                                                : 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
-                                        }`}
+                                                    ? 'bg-red-500/10 text-[#ef4444] border border-red-500/20'
+                                                    : 'bg-yellow-500/10 text-[#fbbf24] border border-yellow-500/20'
+                                            }`}
                                     >
                                         Status: {statusText}
                                     </span>
@@ -144,9 +143,9 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                         <div className="flex flex-col gap-4">
                             {/* Customer info */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <InfoBlock 
-                                    label="Customer Information" 
-                                    icon={<FiUser size={16} />} 
+                                <InfoBlock
+                                    label="Customer Information"
+                                    icon={<FiUser size={16} />}
                                     value={
                                         <div className="mt-1">
                                             <div className="text-white font-medium text-sm">Customer Order</div>
@@ -154,9 +153,9 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                         </div>
                                     }
                                 />
-                                <InfoBlock 
-                                    label="Vendor / Shop" 
-                                    icon={<FiShoppingBag size={16} />} 
+                                <InfoBlock
+                                    label="Vendor / Shop"
+                                    icon={<FiShoppingBag size={16} />}
                                     value={
                                         <div className="mt-1">
                                             <div className="text-white font-medium text-sm">Verified Vendor</div>
@@ -175,7 +174,7 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                     {products.map((item, idx) => {
                                         const prod = item.productId;
                                         const imagePath = prod?.images?.[0];
-                                        const imageUrl = imagePath 
+                                        const imageUrl = imagePath
                                             ? (imagePath.startsWith('http') ? imagePath : `${baseURL}/${imagePath.replace(/\\/g, '/')}`)
                                             : null;
 
@@ -183,10 +182,10 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                                             <div key={item._id || idx} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white/[0.03]">
                                                 <div className="flex items-center gap-3">
                                                     {imageUrl ? (
-                                                        <img 
-                                                            src={imageUrl} 
-                                                            alt={prod?.name || 'Product'} 
-                                                            className="w-10 h-10 rounded-lg object-cover bg-white/5 border border-white/10 shrink-0" 
+                                                        <img
+                                                            src={imageUrl}
+                                                            alt={prod?.name || 'Product'}
+                                                            className="w-10 h-10 rounded-lg object-cover bg-white/5 border border-white/10 shrink-0"
                                                         />
                                                     ) : (
                                                         <div className="w-10 h-10 rounded-lg bg-[#ff4b72]/20 flex items-center justify-center text-[#ff4b72] shrink-0 font-bold text-xs">
@@ -210,30 +209,30 @@ export const OrderDetailsModal = ({ open, orderId, onClose }: OrderDetailsModalP
                             </div>
 
                             {/* Delivery Address */}
-                            <InfoBlock 
-                                label="Delivery Address" 
-                                icon={<FiMapPin size={16} />} 
-                                value={address} 
+                            <InfoBlock
+                                label="Delivery Address"
+                                icon={<FiMapPin size={16} />}
+                                value={address}
                             />
 
                             {/* Payment Summary */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <InfoBlock 
-                                    label="Total Amount" 
-                                    icon={<FiCreditCard size={16} />} 
-                                    value={`$${totalAmount}`} 
+                                <InfoBlock
+                                    label="Total Amount"
+                                    icon={<FiCreditCard size={16} />}
+                                    value={`$${totalAmount}`}
                                     valueClassName="text-xl font-bold mt-1 text-[#ff4b72] font-sans"
                                 />
                                 {giftStatus !== 'none' && (
-                                    <InfoBlock 
-                                        label="Gift Status" 
-                                        icon={<FiGift size={16} />} 
+                                    <InfoBlock
+                                        label="Gift Status"
+                                        icon={<FiGift size={16} />}
                                         value={
                                             <div className="mt-1">
                                                 <div className="text-white text-sm font-semibold capitalize">{giftStatus}</div>
                                                 {giftAmount && <div className="text-white/40 text-xs mt-0.5">Amount: ${giftAmount}</div>}
                                             </div>
-                                        } 
+                                        }
                                     />
                                 )}
                             </div>

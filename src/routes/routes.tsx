@@ -24,6 +24,7 @@ import Gifts from '../pages/gifts/Gifts';
 import Chats from '../pages/chats/Chats';
 import Category from '../pages/category/Category';
 import ShopOverview from '../pages/shop/ShopOverview';
+import MyShop from '../pages/my-shop/MyShop';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 
@@ -39,11 +40,17 @@ const router = createBrowserRouter([
         children: [
             { path: '', element: <Dashboard /> },
             { path: 'users', element: <Users /> },
+            { path: 'my-shop', element: <MyShop /> },
             { path: 'vendors', element: <Vendors /> },
+            { path: 'vendors/overview', element: <ShopOverview /> },
+            { path: 'vendors/orders', element: <Orders /> },
+            { path: 'vendors/products', element: <Products /> },
             { path: 'shop', element: <ShopOverview /> },
             { path: 'shop/overview', element: <ShopOverview /> },
             { path: 'shop/orders', element: <Orders /> },
+            { path: 'shop/order', element: <Orders /> },
             { path: 'shop/products', element: <Products /> },
+            { path: 'shop/product', element: <Products /> },
             { path: 'orders', element: <Orders /> },
             { path: 'products', element: <Products /> },
             { path: 'category', element: <Category /> },

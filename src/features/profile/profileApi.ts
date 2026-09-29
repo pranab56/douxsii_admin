@@ -1,5 +1,20 @@
 import { baseApi } from "../../utils/apiBaseQuery";
 
+export interface ShopInfo {
+    _id: string;
+    name: string;
+    description?: string;
+    website?: string;
+    phone?: string;
+    tradeLicense?: string;
+    image?: string;
+    businessName?: string;
+    address?: string;
+    latitude?: number | string;
+    longitude?: number | string;
+    workingHours?: string;
+}
+
 export interface ProfileData {
     _id: string;
     profile?: string;
@@ -18,6 +33,7 @@ export interface ProfileData {
     isRegistrationFee?: boolean;
     createdAt?: string;
     updatedAt?: string;
+    shopId?: ShopInfo | null;
 };
 
 export interface GetProfileResponse {

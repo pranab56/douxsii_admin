@@ -26,13 +26,14 @@ const Login = () => {
                 password: values.password,
             }).unwrap();
 
+            const resData = res?.data as any;
             const accessToken =
                 res?.data?.accessToken ||
-                res?.data?.token ||
+                resData?.token ||
                 (res as any)?.accessToken ||
                 (res as any)?.token;
 
-            const userData = res?.data?.userData || res?.data?.user || (res as any)?.userData;
+            const userData = res?.data?.userData || resData?.user || (res as any)?.userData;
 
             const isSuccessResponse = res?.success !== false && Boolean(accessToken);
 

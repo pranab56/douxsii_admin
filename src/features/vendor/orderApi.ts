@@ -73,7 +73,7 @@ export interface GetAllOrderParams {
 
 export const orderApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAllMyOrder: builder.query<GetAllOrderResponse, GetAllOrderParams | void>({
+        getAllOrder: builder.query<GetAllOrderResponse, GetAllOrderParams | void>({
             query: (params) => {
                 const queryParams = new URLSearchParams();
                 if (params?.page) queryParams.append("page", params.page.toString());
@@ -83,7 +83,7 @@ export const orderApi = baseApi.injectEndpoints({
                 }
                 const queryString = queryParams.toString();
                 return {
-                    url: `/order${queryString ? `?${queryString}` : ""}`,
+                    url: `/order/all${queryString ? `?${queryString}` : ""}`,
                     method: "GET",
                 };
             },
@@ -110,12 +110,13 @@ export const orderApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["order"],
         }),
+
     }),
 });
 
 // Export hooks
 export const {
-    useGetAllMyOrderQuery,
+    useGetAllOrderQuery,
     useGetSingleOrderQuery,
     useUpdateStatusMutation
 } = orderApi;

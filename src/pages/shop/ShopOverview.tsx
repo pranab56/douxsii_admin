@@ -20,7 +20,7 @@ import {
 } from 'react-icons/fi';
 import PageHeader from '../../components/ui/PageHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { useGetAllShopOverviewQuery } from '../../features/shop/overviewApi';
+import { useGetAllShopOverviewQuery } from '../../features/vendor/overviewApi';
 
 const ShopOverview = () => {
     // Primary Shop Overview Query
@@ -64,7 +64,7 @@ const ShopOverview = () => {
             iconBg: '#46000B',
             badge: (
                 <Link
-                    to="/orders"
+                    to="/shop/orders"
                     className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-white/80 hover:text-white border border-white/15 no-underline flex items-center gap-1 transition-colors"
                 >
                     View All <FiArrowRight size={10} />
@@ -106,7 +106,7 @@ const ShopOverview = () => {
                 extra={
                     <div className="flex items-center gap-3">
                         <Link
-                            to="/orders"
+                            to="/shop/orders"
                             className="h-10 px-4 rounded-xl text-white font-medium text-xs sm:text-sm flex items-center gap-2 transition-all hover:opacity-90 cursor-pointer border border-white/15 no-underline shadow-sm"
                             style={{ background: 'linear-gradient(135deg, #46000B, #6B000F)' }}
                         >
@@ -114,7 +114,7 @@ const ShopOverview = () => {
                             <span>Orders</span>
                         </Link>
                         <Link
-                            to="/products"
+                            to="/shop/products"
                             className="h-10 px-4 rounded-xl text-white font-medium text-xs sm:text-sm flex items-center gap-2 transition-all hover:opacity-90 cursor-pointer border border-white/15 no-underline shadow-sm"
                             style={{ background: '#560e18' }}
                         >
@@ -333,7 +333,7 @@ const ShopOverview = () => {
                     </div>
 
                     <Link
-                        to="/orders"
+                        to="/shop/orders"
                         className="w-full h-10 rounded-xl flex items-center justify-center gap-2 text-white font-medium text-xs transition-all hover:bg-white/10 border border-white/10 no-underline"
                         style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                     >

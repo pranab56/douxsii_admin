@@ -65,14 +65,14 @@ export interface GetAllProductParams {
 
 export const productApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAllMyProduct: builder.query<GetAllProductResponse, GetAllProductParams | void>({
+        getAllProduct: builder.query<GetAllProductResponse, GetAllProductParams | void>({
             query: (params) => {
                 const queryParams = new URLSearchParams();
                 if (params?.page) queryParams.append("page", params.page.toString());
                 if (params?.searchTerm) queryParams.append("searchTerm", params.searchTerm);
                 const queryString = queryParams.toString();
                 return {
-                    url: `/product/user?type=flower&${queryString ? `&${queryString}` : ""}`,
+                    url: `/product/all${queryString ? `?${queryString}` : ""}`,
                     method: "GET",
                 };
             },
@@ -120,7 +120,7 @@ export const productApi = baseApi.injectEndpoints({
 
 // Export hooks
 export const {
-    useGetAllMyProductQuery,
+    useGetAllProductQuery,
     useGetSingleProductQuery,
     useCreateProductMutation,
     useUpdateProductMutation,

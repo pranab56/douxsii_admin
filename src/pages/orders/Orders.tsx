@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FiEye, FiShoppingCart, FiCheckCircle, FiClock, FiCreditCard, FiBox } from 'react-icons/fi';
 import PageHeader from '../../components/ui/PageHeader';
 import Table from '../../components/ui/Table';
@@ -6,25 +7,40 @@ import Pagination from '../../components/ui/Pagination';
 import OrderDetailsModal from '../../components/ui/OrderDetailsModal';
 import CustomSelect from '../../components/ui/CustomSelect';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { useGetAllOrderQuery, OrderItem } from '../../features/shop/orderApi';
+import {
+    useGetAllMyOrderQuery as useShopGetAllOrderQuery, OrderItem, GetAllOrderResponse,
+} from '../../features/shop/orderApi';
+import {
+    useGetAllOrderQuery as useVendorGetAllOrderQuery,
+} from '../../features/vendor/orderApi';
 import { baseURL } from '../../utils/BaseURL';
 
-const Orders = () => {
-    const [statusFilter, setStatusFilter] = useState('All');
-    const [page, setPage] = useState(1);
+interface OrdersViewProps {
+    isShopRoute: boolean;
+    statsResponse?: GetAllOrderResponse;
+    isStatsLoading: boolean;
+    ordersResponse?: GetAllOrderResponse;
+    isLoading: boolean;
+    statusFilter: string;
+    setStatusFilter: (val: string) => void;
+    page: number;
+    setPage: (val: number) => void;
+}
 
+const OrdersView = ({
+    isShopRoute,
+    statsResponse,
+    isStatsLoading,
+    ordersResponse,
+    isLoading,
+    statusFilter,
+    setStatusFilter,
+    page,
+    setPage,
+}: OrdersViewProps) => {
     // Modals State
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
-
-    // Unfiltered Query for fixed Stats Cards
-    const { data: statsResponse, isLoading: isStatsLoading } = useGetAllOrderQuery();
-
-    // Filtered Query for Table Data & Status Filter
-    const { data: ordersResponse, isLoading } = useGetAllOrderQuery({
-        page,
-        status: statusFilter,
-    });
 
     const allOrdersList: OrderItem[] = statsResponse?.data || [];
     const ordersList: OrderItem[] = ordersResponse?.data || [];
@@ -32,8 +48,12 @@ const Orders = () => {
 
     // Fixed Stats Cards Computation
     const totalOrders = statsResponse?.meta?.total ?? allOrdersList.length;
-    const completedOrders = allOrdersList.filter(o => ['completed', 'delivered'].includes(o.status?.toLowerCase())).length;
-    const pendingOrders = allOrdersList.filter(o => ['pending', 'processing'].includes(o.status?.toLowerCase())).length;
+    const completedOrders = allOrdersList.filter((o) =>
+        ['completed', 'delivered'].includes(o.status?.toLowerCase())
+    ).length;
+    const pendingOrders = allOrdersList.filter((o) =>
+        ['pending', 'processing'].includes(o.status?.toLowerCase())
+    ).length;
     const totalRevenue = allOrdersList.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 
     const pageSize = meta?.limit || 10;
@@ -45,30 +65,30 @@ const Orders = () => {
     };
 
     const stats = [
-        { 
-            label: 'Total Orders', 
+        {
+            label: 'Total Orders',
             value: isStatsLoading ? '...' : totalOrders.toLocaleString(),
             icon: <FiShoppingCart size={20} className="text-white" />,
             iconBg: '#46000B',
         },
-        { 
-            label: 'Completed Orders', 
+        {
+            label: 'Completed Orders',
             value: isStatsLoading ? '...' : completedOrders.toLocaleString(),
             icon: <FiCheckCircle size={20} className="text-[#10b981]" />,
             iconBg: '#46000B',
         },
-        { 
-            label: 'Pending Orders', 
+        {
+            label: 'Pending Orders',
             value: isStatsLoading ? '...' : pendingOrders.toLocaleString(),
             icon: <FiClock size={20} className="text-[#fbbf24]" />,
             iconBg: '#46000B',
         },
-        { 
-            label: 'Total Revenue', 
+        {
+            label: 'Total Revenue',
             value: isStatsLoading ? '...' : `$${totalRevenue.toFixed(2)}`,
             icon: <FiCreditCard size={20} className="text-[#ff4b72]" />,
             iconBg: '#46000B',
-        }
+        },
     ];
 
     const columns = [
@@ -77,7 +97,7 @@ const Orders = () => {
             dataIndex: '_id',
             key: '_id',
             render: (id: string) => (
-                <span 
+                <span
                     onClick={() => handleOpenDetails(id)}
                     className="text-white/80 hover:text-[#ff4b72] text-xs font-mono font-medium cursor-pointer transition-colors"
                 >
@@ -93,21 +113,21 @@ const Orders = () => {
                 const prod = firstItem?.productId;
                 const prodName = prod?.name || 'Ordered Product';
                 const imagePath = prod?.images?.[0];
-                const imageUrl = imagePath 
+                const imageUrl = imagePath
                     ? (imagePath.startsWith('http') ? imagePath : `${baseURL}/${imagePath.replace(/\\/g, '/')}`)
                     : null;
                 const count = record.productList?.length || 0;
 
                 return (
-                    <div 
+                    <div
                         className="flex items-center gap-3 cursor-pointer group"
                         onClick={() => handleOpenDetails(record._id)}
                     >
                         {imageUrl ? (
-                            <img 
-                                src={imageUrl} 
-                                alt={prodName} 
-                                className="w-11 h-11 rounded-xl object-cover bg-white/5 border border-white/10 shrink-0" 
+                            <img
+                                src={imageUrl}
+                                alt={prodName}
+                                className="w-11 h-11 rounded-xl object-cover bg-white/5 border border-white/10 shrink-0"
                                 onError={(e) => {
                                     (e.target as HTMLImageElement).src = '/vite.svg';
                                 }}
@@ -128,7 +148,7 @@ const Orders = () => {
                         </div>
                     </div>
                 );
-            }
+            },
         },
         {
             title: 'Total Amount',
@@ -138,7 +158,7 @@ const Orders = () => {
                 <span className="text-white text-sm font-bold font-sans">
                     ${(val ?? 0).toFixed(2)}
                 </span>
-            )
+            ),
         },
         {
             title: 'Order Status',
@@ -152,38 +172,24 @@ const Orders = () => {
                 const isProcessing = st === 'processing' || st === 'delivered';
 
                 return (
-                    <span 
-                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${
-                            isAccepted
-                                ? 'bg-emerald-500/15 text-[#10b981] border border-emerald-500/20' 
+                    <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block uppercase tracking-wider ${isAccepted
+                                ? 'bg-emerald-500/15 text-[#10b981] border border-emerald-500/20'
                                 : isCompleted
-                                ? 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
-                                : isProcessing
-                                ? 'bg-purple-500/15 text-[#a855f7] border border-purple-500/20'
-                                : isRejected
-                                ? 'bg-red-500/15 text-[#ef4444] border border-red-500/20'
-                                : 'bg-amber-500/15 text-[#fbbf24] border border-amber-500/20'
-                        }`}
+                                    ? 'bg-blue-500/15 text-[#38bdf8] border border-blue-500/20'
+                                    : isProcessing
+                                        ? 'bg-purple-500/15 text-[#a855f7] border border-purple-500/20'
+                                        : isRejected
+                                            ? 'bg-red-500/15 text-[#ef4444] border border-red-500/20'
+                                            : 'bg-amber-500/15 text-[#fbbf24] border border-amber-500/20'
+                            }`}
                     >
                         {status || 'Completed'}
                     </span>
                 );
-            }
+            },
         },
-        {
-            title: 'Payment Status',
-            dataIndex: 'paymentStatus',
-            key: 'paymentStatus',
-            render: (val?: string) => (
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider inline-block ${
-                    val?.toLowerCase() === 'paid'
-                        ? 'bg-green-500/15 text-[#10b981] border border-green-500/20'
-                        : 'bg-amber-500/15 text-[#fbbf24] border border-amber-500/20'
-                }`}>
-                    {val || 'Unpaid'}
-                </span>
-            )
-        },
+      
         {
             title: 'Gift Status',
             dataIndex: 'giftStatus',
@@ -191,15 +197,16 @@ const Orders = () => {
             render: (val?: string) => {
                 const st = (val || 'none').toLowerCase();
                 return (
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider inline-block ${
-                        st === 'redeemed' 
-                            ? 'bg-emerald-500/15 text-[#10b981] border border-emerald-500/20' 
-                            : 'bg-white/[0.05] text-white/60 border border-white/10'
-                    }`}>
+                    <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider inline-block ${st === 'redeemed'
+                                ? 'bg-emerald-500/15 text-[#10b981] border border-emerald-500/20'
+                                : 'bg-white/[0.05] text-white/60 border border-white/10'
+                            }`}
+                    >
                         {val || 'none'}
                     </span>
                 );
-            }
+            },
         },
         {
             title: 'Date',
@@ -209,7 +216,7 @@ const Orders = () => {
                 <span className="text-white/60 text-xs">
                     {val ? new Date(val).toLocaleDateString() : 'N/A'}
                 </span>
-            )
+            ),
         },
         {
             title: 'Actions',
@@ -224,30 +231,37 @@ const Orders = () => {
                         <FiEye size={16} />
                     </button>
                 </div>
-            )
-        }
+            ),
+        },
     ];
 
     return (
         <div className="space-y-6 pb-6 relative">
-            <PageHeader title="Order Management" subtitle="Manage all customer and store orders" />
+            <PageHeader
+                title="Order Management"
+                subtitle={
+                    isShopRoute
+                        ? 'Manage orders for your shop'
+                        : 'Manage all customer and store orders across vendors'
+                }
+            />
 
             {/* Stats Cards Section (Fixed & Unfiltered) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
-                    <div 
-                        key={idx} 
+                    <div
+                        key={idx}
                         className="rounded-2xl p-6 flex items-center justify-between transition-all duration-300 hover:scale-[1.02]"
                         style={{
                             background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)'
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
                         }}
                     >
                         <div>
                             <span className="text-white/60 text-sm font-medium tracking-wide">{stat.label}</span>
                             <h2 className="text-white text-3xl font-bold mt-2 font-sans">{stat.value}</h2>
                         </div>
-                        <div 
+                        <div
                             className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/10 shadow-sm"
                             style={{ backgroundColor: stat.iconBg }}
                         >
@@ -258,15 +272,15 @@ const Orders = () => {
             </div>
 
             {/* Content Table Area */}
-            <div 
+            <div
                 className="p-6 rounded-2xl flex flex-col gap-6"
                 style={{
                     background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}
             >
                 <div className="flex justify-end items-center">
-                    <CustomSelect 
+                    <CustomSelect
                         value={statusFilter}
                         onChange={(val) => {
                             setStatusFilter(val);
@@ -278,30 +292,30 @@ const Orders = () => {
                             { value: 'delivered', label: 'Delivered' },
                             { value: 'pending', label: 'Pending' },
                             { value: 'processing', label: 'Processing' },
-                            { value: 'rejected', label: 'Rejected' }
+                            { value: 'rejected', label: 'Rejected' },
                         ]}
                         className="w-40"
                     />
                 </div>
 
                 <div className="overflow-x-auto relative">
-                    {isLoading  ? (
+                    {isLoading ? (
                         <LoadingSpinner text="Loading orders..." />
                     ) : ordersList.length === 0 ? (
                         <div className="py-16 text-center text-white/50 text-base">
                             No orders found.
                         </div>
                     ) : (
-                        <Table 
-                            dataSource={ordersList} 
-                            columns={columns} 
+                        <Table
+                            dataSource={ordersList}
+                            columns={columns}
                             rowKey="_id"
                         />
                     )}
                 </div>
 
                 {totalItems > pageSize && (
-                    <Pagination 
+                    <Pagination
                         current={page}
                         pageSize={pageSize}
                         total={totalItems}
@@ -318,6 +332,75 @@ const Orders = () => {
             />
         </div>
     );
+};
+
+// ===================== SHOP ORDERS CONTAINER =====================
+const ShopOrders = () => {
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [page, setPage] = useState(1);
+
+    // Unfiltered Query for fixed Stats Cards (hits /order via features/shop/orderApi)
+    const { data: statsResponse, isLoading: isStatsLoading } = useShopGetAllOrderQuery();
+
+    // Filtered Query for Table Data & Status Filter
+    const { data: ordersResponse, isLoading } = useShopGetAllOrderQuery({
+        page,
+        status: statusFilter,
+    });
+
+    return (
+        <OrdersView
+            isShopRoute={true}
+            statsResponse={statsResponse}
+            isStatsLoading={isStatsLoading}
+            ordersResponse={ordersResponse}
+            isLoading={isLoading}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            page={page}
+            setPage={setPage}
+        />
+    );
+};
+
+// ===================== VENDOR ORDERS CONTAINER =====================
+const VendorOrders = () => {
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [page, setPage] = useState(1);
+
+    // Unfiltered Query for fixed Stats Cards (hits /order/all via features/vendor/orderApi)
+    const { data: statsResponse, isLoading: isStatsLoading } = useVendorGetAllOrderQuery();
+
+    // Filtered Query for Table Data & Status Filter
+    const { data: ordersResponse, isLoading } = useVendorGetAllOrderQuery({
+        page,
+        status: statusFilter,
+    });
+
+    return (
+        <OrdersView
+            isShopRoute={false}
+            statsResponse={statsResponse}
+            isStatsLoading={isStatsLoading}
+            ordersResponse={ordersResponse}
+            isLoading={isLoading}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            page={page}
+            setPage={setPage}
+        />
+    );
+};
+
+// ===================== MAIN ORDERS ROUTE =====================
+const Orders = () => {
+    const location = useLocation();
+    const isShopRoute = location.pathname.startsWith('/shop') || location.pathname.startsWith('/my-shop');
+
+    if (isShopRoute) {
+        return <ShopOrders />;
+    }
+    return <VendorOrders />;
 };
 
 export default Orders;

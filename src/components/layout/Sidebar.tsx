@@ -9,6 +9,9 @@ import ConfirmModal from '../ui/ConfirmModal';
 import { useAppDispatch } from '../../redux/hooks';
 import { logout } from '../../features/auth/authSlice';
 
+import { useGetMyProfileQuery } from '../../features/profile/profileApi';
+import { FiShoppingCart, FiBox, FiPieChart, FiSettings } from 'react-icons/fi';
+
 const { Sider } = Layout;
 
 const Sidebar = () => {
@@ -16,16 +19,27 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-    const [openKeys, setOpenKeys] = useState<string[]>(['shop']);
+    const [openKeys, setOpenKeys] = useState<string[]>([]);
+
+    const { data: profileResponse } = useGetMyProfileQuery();
+    const myShop = profileResponse?.data?.result?.shopId;
+    const hasShop = Boolean(myShop && (myShop._id || myShop.name));
 
     useEffect(() => {
-        const isShopChildRoute = ['/shop', '/orders', '/products'].some(
-            (p) => location.pathname === p || location.pathname.startsWith(p + '/')
-        );
-        if (isShopChildRoute) {
-            setOpenKeys((prev) => (prev.includes('shop') ? prev : [...prev, 'shop']));
+        const path = location.pathname;
+        // Vendors auto-open: only /vendors/* and standalone /orders, /products
+        const isVendorChildRoute = ['/vendors'].some(
+            (p) => path === p || path.startsWith(p + '/')
+        ) || path === '/orders' || path === '/products';
+        if (isVendorChildRoute) {
+            setOpenKeys((prev) => (prev.includes('vendors') ? prev : [...prev, 'vendors']));
         }
-    }, [location.pathname]);
+        // My Shop auto-open: /my-shop/* and /shop/*
+        const isMyShopRoute = path === '/my-shop' || path.startsWith('/my-shop/') || path.startsWith('/shop/');
+        if (hasShop && isMyShopRoute) {
+            setOpenKeys((prev) => (prev.includes('my-shop') ? prev : [...prev, 'my-shop']));
+        }
+    }, [location.pathname, hasShop]);
 
     const handleOpenLogoutModal = () => {
         setIsLogoutModalOpen(true);
@@ -45,13 +59,60 @@ const Sidebar = () => {
         setIsLogoutModalOpen(false);
     };
 
+    const processedItems: TSidebarItem[] = sidebarItems.map((item) => {
+        if (item.key === 'my-shop') {
+            if (hasShop) {
+                return {
+                    ...item,
+                    children: [
+                        {
+                            key: 'my-shop-overview',
+                            label: 'Overview',
+                            path: 'shop/overview',
+                            icon: <FiPieChart size={18} />,
+                        },
+                        {
+                            key: 'my-shop-products',
+                            label: 'Product',
+                            path: 'shop/products',
+                            icon: <FiBox size={18} />,
+                        },
+                         {
+                            key: 'my-shop-orders',
+                            label: 'Order',
+                            path: 'shop/orders',
+                            icon: <FiShoppingCart size={18} />,
+                        },
+                        {
+                            key: 'my-shop-profile',
+                            label: 'Settings',
+                            path: 'my-shop',
+                            icon: <FiSettings size={18} />,
+                        },
+                       
+                        
+                    ],
+                };
+            }
+            return {
+                ...item,
+                children: undefined,
+            };
+        }
+        return item;
+    });
+
     const sidebarItemsGenerator = (items: TSidebarItem[]): MenuProps['items'] => {
         return items.map((item) => {
             if (item.children && item.children.length > 0) {
+                // Parent with children — make parent label a Link if it has a path
+                const parentLabel = item.path !== undefined
+                    ? <Link to={item.path === '' ? '/' : `/${item.path}`}>{item.label}</Link>
+                    : item.label;
                 return {
                     key: item.key,
                     icon: item.icon,
-                    label: item.label,
+                    label: parentLabel,
                     children: item.children.map((child) => {
                         const childPath = child.path === '' ? '/' : `/${child.path}`;
                         return {
@@ -72,9 +133,12 @@ const Sidebar = () => {
     };
 
     let selectedKey = location.pathname;
-    if (selectedKey === '/shop') selectedKey = '/shop/overview';
-    if (selectedKey === '/shop/orders') selectedKey = '/orders';
-    if (selectedKey === '/shop/products') selectedKey = '/products';
+    // Remap /shop (bare) and /vendors/overview to /shop/overview
+    if (selectedKey === '/shop' || selectedKey === '/vendors/overview') selectedKey = '/shop/overview';
+    if (selectedKey === '/vendors/orders') selectedKey = '/orders';
+    if (selectedKey === '/vendors/products') selectedKey = '/products';
+    if (selectedKey === '/shop/order') selectedKey = '/shop/orders';
+    if (selectedKey === '/shop/product') selectedKey = '/shop/products';
 
     return (
         <ConfigProvider
@@ -141,7 +205,7 @@ const Sidebar = () => {
                             selectedKeys={[selectedKey]}
                             openKeys={openKeys}
                             onOpenChange={(keys) => setOpenKeys(keys)}
-                            items={sidebarItemsGenerator(sidebarItems)}
+                            items={sidebarItemsGenerator(processedItems)}
                             style={{ borderRight: 0, background: 'transparent' }}
                         />
                     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FiEye, FiTrash2, FiBox, FiEdit2 } from 'react-icons/fi';
 import { AiOutlinePlus } from 'react-icons/ai';
 import toast from 'react-hot-toast';
@@ -11,13 +12,44 @@ import CreateProductModal from '../../components/ui/CreateProductModal';
 import EditProductModal from '../../components/ui/EditProductModal';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { useGetAllProductQuery, useDeleteProductMutation, ProductItem } from '../../features/shop/productApi';
+import {
+    useGetAllMyProductQuery as useShopGetAllProductQuery,
+    useDeleteProductMutation as useShopDeleteProductMutation,
+    ProductItem,
+    GetAllProductResponse,
+} from '../../features/shop/productApi';
+import {
+    useGetAllProductQuery as useVendorGetAllProductQuery,
+} from '../../features/vendor/productApi';
 import { baseURL } from '../../utils/BaseURL';
 
-const Products = () => {
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
+interface ProductsViewProps {
+    isShopRoute: boolean;
+    statsResponse?: GetAllProductResponse;
+    isStatsLoading: boolean;
+    productsResponse?: GetAllProductResponse;
+    isLoading: boolean;
+    search: string;
+    setSearch: (val: string) => void;
+    page: number;
+    setPage: (val: number) => void;
+    onDeleteProduct?: (id: string) => Promise<any>;
+    isDeleting?: boolean;
+}
 
+const ProductsView = ({
+    isShopRoute,
+    statsResponse,
+    isStatsLoading,
+    productsResponse,
+    isLoading,
+    search,
+    setSearch,
+    page,
+    setPage,
+    onDeleteProduct,
+    isDeleting = false,
+}: ProductsViewProps) => {
     // Modals State
     const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -27,25 +59,14 @@ const Products = () => {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    // Unfiltered Query for fixed Stats Cards
-    const { data: statsResponse, isLoading: isStatsLoading } = useGetAllProductQuery();
-
-    // Filtered Query for Table Data & Search
-    const { data: productsResponse, isLoading } = useGetAllProductQuery({
-        page,
-        searchTerm: search,
-    });
-
-    const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
-
     const allProductsList: ProductItem[] = statsResponse?.data || [];
     const productsList: ProductItem[] = productsResponse?.data || [];
     const meta = productsResponse?.meta;
 
     // Fixed Stats Card Computation
     const totalProducts = statsResponse?.meta?.total ?? allProductsList.length;
-    const flowerProducts = allProductsList.filter(p => p.type?.toLowerCase() === 'flower').length;
-    const otherProducts = allProductsList.filter(p => p.type?.toLowerCase() !== 'flower').length;
+    const flowerProducts = allProductsList.filter((p) => p.type?.toLowerCase() === 'flower').length;
+    const otherProducts = allProductsList.filter((p) => p.type?.toLowerCase() !== 'flower').length;
 
     const pageSize = meta?.limit || 10;
     const totalItems = meta?.total ?? productsList.length;
@@ -66,9 +87,9 @@ const Products = () => {
     };
 
     const handleDeleteConfirm = async () => {
-        if (!deletingId) return;
+        if (!deletingId || !onDeleteProduct) return;
         try {
-            const res = await deleteProduct(deletingId).unwrap();
+            const res = await onDeleteProduct(deletingId);
             toast.success(res?.message || 'Product deleted successfully!');
         } catch (err: any) {
             toast.error(err?.data?.message || err?.message || 'Failed to delete product');
@@ -93,7 +114,7 @@ const Products = () => {
             label: 'Other Products',
             value: isStatsLoading ? '...' : otherProducts.toLocaleString(),
             iconBg: '#46000B',
-        }
+        },
     ];
 
     const columns = [
@@ -129,13 +150,10 @@ const Products = () => {
                             <span className="text-white text-sm font-semibold group-hover:text-[#ff4b72] transition-colors block line-clamp-1">
                                 {record.name}
                             </span>
-                            <span className="text-white/40 text-[11px] block mt-0.5 uppercase tracking-wider">
-                                {record.type || 'other'}
-                            </span>
                         </div>
                     </div>
                 );
-            }
+            },
         },
         {
             title: 'Shop / Store',
@@ -144,7 +162,7 @@ const Products = () => {
                 <span className="text-white text-sm font-medium">
                     {record.shopId?.name || 'Store Product'}
                 </span>
-            )
+            ),
         },
         {
             title: 'Price',
@@ -161,7 +179,7 @@ const Products = () => {
                         </span>
                     ) : null}
                 </div>
-            )
+            ),
         },
         {
             title: 'Rating',
@@ -171,7 +189,7 @@ const Products = () => {
                 <span className="text-amber-400 text-sm font-medium">
                     ★ {val ? val.toFixed(1) : '0.0'}
                 </span>
-            )
+            ),
         },
         {
             title: 'Actions',
@@ -185,39 +203,49 @@ const Products = () => {
                     >
                         <FiEye size={16} />
                     </button>
-                    <button
-                        onClick={() => handleOpenEdit(record._id)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-blue-500/20 text-[#38bdf8] transition-colors border border-white/10 cursor-pointer"
-                        title="Edit / Update Product"
-                    >
-                        <FiEdit2 size={16} />
-                    </button>
-                    <button
-                        onClick={() => handleDeleteRequest(record._id)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-red-400 transition-colors border border-white/10 cursor-pointer"
-                        title="Delete Product"
-                    >
-                        <FiTrash2 size={16} />
-                    </button>
+                    {isShopRoute && (
+                        <>
+                            <button
+                                onClick={() => handleOpenEdit(record._id)}
+                                className="p-2 rounded-lg bg-white/5 hover:bg-blue-500/20 text-[#38bdf8] transition-colors border border-white/10 cursor-pointer"
+                                title="Edit / Update Product"
+                            >
+                                <FiEdit2 size={16} />
+                            </button>
+                            <button
+                                onClick={() => handleDeleteRequest(record._id)}
+                                className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-red-400 transition-colors border border-white/10 cursor-pointer"
+                                title="Delete Product"
+                            >
+                                <FiTrash2 size={16} />
+                            </button>
+                        </>
+                    )}
                 </div>
-            )
-        }
+            ),
+        },
     ];
 
     return (
         <div className="space-y-6 pb-6 relative">
             <PageHeader
                 title="Product Management"
-                subtitle="Manage all products from all vendors and store catalogue"
+                subtitle={
+                    isShopRoute
+                        ? 'Manage all products from your store catalogue'
+                        : 'View all products from all vendors'
+                }
                 extra={
-                    <button
-                        onClick={() => setCreateModalOpen(true)}
-                        className="h-10 px-4 rounded-xl text-white font-medium text-xs sm:text-sm flex items-center gap-2 transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 shadow-sm"
-                        style={{ background: '#ff2150' }}
-                    >
-                        <AiOutlinePlus size={16} />
-                        <span>Add Product</span>
-                    </button>
+                    isShopRoute ? (
+                        <button
+                            onClick={() => setCreateModalOpen(true)}
+                            className="h-10 px-4 rounded-xl text-white font-medium text-xs sm:text-sm flex items-center gap-2 transition-all hover:opacity-90 active:scale-95 cursor-pointer border-0 shadow-sm"
+                            style={{ background: '#ff2150' }}
+                        >
+                            <AiOutlinePlus size={16} />
+                            <span>Add Product</span>
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -229,7 +257,7 @@ const Products = () => {
                         className="rounded-2xl p-6 flex flex-col justify-center transition-all duration-300 hover:scale-[1.02]"
                         style={{
                             background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)'
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
                         }}
                     >
                         <span className="text-white/60 text-sm font-medium">{stat.label}</span>
@@ -243,7 +271,7 @@ const Products = () => {
                 className="p-6 rounded-2xl flex flex-col gap-6"
                 style={{
                     background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}
             >
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
@@ -283,47 +311,126 @@ const Products = () => {
                 )}
             </div>
 
-            {/* Create Product Modal */}
-            <CreateProductModal
-                open={createModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-            />
+            {/* Create/Edit/Delete Modals — Only for My Shop route */}
+            {isShopRoute && (
+                <>
+                    <CreateProductModal
+                        open={createModalOpen}
+                        onClose={() => setCreateModalOpen(false)}
+                    />
 
-            {/* Edit / Update Product Modal */}
-            <EditProductModal
-                open={editModalOpen}
-                productId={editingProductId}
-                onClose={() => {
-                    setEditModalOpen(false);
-                    setEditingProductId(null);
-                }}
-            />
+                    <EditProductModal
+                        open={editModalOpen}
+                        productId={editingProductId}
+                        onClose={() => {
+                            setEditModalOpen(false);
+                            setEditingProductId(null);
+                        }}
+                    />
 
-            {/* Details Modal */}
+                    <ConfirmModal
+                        open={confirmOpen}
+                        title="Delete Product"
+                        description="Are you sure you want to delete this product? This action cannot be undone."
+                        type="danger"
+                        isLoading={isDeleting}
+                        confirmText="Delete"
+                        onConfirm={handleDeleteConfirm}
+                        onCancel={() => {
+                            if (!isDeleting) {
+                                setConfirmOpen(false);
+                                setDeletingId(null);
+                            }
+                        }}
+                    />
+                </>
+            )}
+
+            {/* Details Modal — Always available */}
             <ProductDetailsModal
                 open={detailsOpen}
                 productId={selectedProductId}
                 onClose={() => setDetailsOpen(false)}
             />
-
-            {/* Delete Confirmation Modal */}
-            <ConfirmModal
-                open={confirmOpen}
-                title="Delete Product"
-                description="Are you sure you want to delete this product? This action cannot be undone."
-                type="danger"
-                isLoading={isDeleting}
-                confirmText="Delete"
-                onConfirm={handleDeleteConfirm}
-                onCancel={() => {
-                    if (!isDeleting) {
-                        setConfirmOpen(false);
-                        setDeletingId(null);
-                    }
-                }}
-            />
         </div>
     );
+};
+
+// ===================== SHOP PRODUCTS CONTAINER =====================
+const ShopProducts = () => {
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+
+    // Unfiltered Query for fixed Stats Cards
+    const { data: statsResponse, isLoading: isStatsLoading } = useShopGetAllProductQuery();
+
+    // Filtered Query for Table Data & Search
+    const { data: productsResponse, isLoading } = useShopGetAllProductQuery({
+        page,
+        searchTerm: search,
+    });
+
+    const [deleteProduct, { isLoading: isDeleting }] = useShopDeleteProductMutation();
+
+    const handleDelete = async (id: string) => {
+        return await deleteProduct(id).unwrap();
+    };
+
+    return (
+        <ProductsView
+            isShopRoute={true}
+            statsResponse={statsResponse}
+            isStatsLoading={isStatsLoading}
+            productsResponse={productsResponse}
+            isLoading={isLoading}
+            search={search}
+            setSearch={setSearch}
+            page={page}
+            setPage={setPage}
+            onDeleteProduct={handleDelete}
+            isDeleting={isDeleting}
+        />
+    );
+};
+
+// ===================== VENDOR PRODUCTS CONTAINER =====================
+const VendorProducts = () => {
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+
+    // Unfiltered Query for fixed Stats Cards
+    const { data: statsResponse, isLoading: isStatsLoading } = useVendorGetAllProductQuery();
+
+    // Filtered Query for Table Data & Search
+    const { data: productsResponse, isLoading } = useVendorGetAllProductQuery({
+        page,
+        searchTerm: search,
+    });
+
+    return (
+        <ProductsView
+            isShopRoute={false}
+            statsResponse={statsResponse}
+            isStatsLoading={isStatsLoading}
+            productsResponse={productsResponse}
+            isLoading={isLoading}
+            search={search}
+            setSearch={setSearch}
+            page={page}
+            setPage={setPage}
+        />
+    );
+};
+
+// ===================== MAIN PRODUCTS ROUTE =====================
+const Products = () => {
+    const location = useLocation();
+    const isShopRoute = location.pathname.startsWith('/shop') || location.pathname.startsWith('/my-shop');
+
+    if (isShopRoute) {
+        return <ShopProducts />;
+    }
+    return <VendorProducts />;
 };
 
 export default Products;

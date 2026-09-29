@@ -66,10 +66,11 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
             formData.append('description', values.description);
             formData.append('categoryId', values.categoryId);
             formData.append('price', String(values.price));
+            formData.append('productType', 'flower');
             formData.append('discount', String(values.discount || 0));
             formData.append('stock', String(values.stock || 0));
             formData.append('deliveryTime', values.deliveryTime || '3 days');
-            formData.append('type', values.type || 'other');
+            formData.append('type', 'flower');
             formData.append('weight', String(values.weight || 0));
             formData.append('length', String(values.length || 0));
             formData.append('height', String(values.height || 0));
@@ -219,27 +220,13 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
                                 </Form.Item>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <Form.Item
-                                    name="type"
-                                    label={<span className="text-white text-xs font-medium">Product Type</span>}
-                                    rules={[{ required: true, message: 'Please select type!' }]}
-                                    className="m-0"
-                                >
-                                    <Select className="h-10" popupClassName="dark-select-dropdown">
-                                        <Option value="other">Other</Option>
-                                        <Option value="flower">Flower</Option>
-                                    </Select>
-                                </Form.Item>
-
-                                <Form.Item
-                                    name="deliveryTime"
-                                    label={<span className="text-white text-xs font-medium">Delivery Time</span>}
-                                    className="m-0"
-                                >
-                                    <Input placeholder="e.g. 3 days" className="h-10" prefix={<FiTruck className="text-white/40" />} />
-                                </Form.Item>
-                            </div>
+                            <Form.Item
+                                name="deliveryTime"
+                                label={<span className="text-white text-xs font-medium">Delivery Time</span>}
+                                className="m-0"
+                            >
+                                <Input placeholder="e.g. 3 days" className="h-10" prefix={<FiTruck className="text-white/40" />} />
+                            </Form.Item>
 
                             <Form.Item
                                 name="description"
