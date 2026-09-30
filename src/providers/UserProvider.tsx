@@ -14,7 +14,7 @@ export type User = {
 export const UserContext = createContext<User | undefined>(undefined);
 
 export const DUMMY_USER: User = {
-  email: "admin@douxsii.com",
+  email: "admin@denior.com",
   image: "/user.svg",
   name: "Mithila Admin",
   role: "SUPER_ADMIN",

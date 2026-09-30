@@ -9,7 +9,7 @@ export const useChatSocket = (chatId: string | null | undefined) => {
     const dispatch = useAppDispatch();
 
     const rawToken = (typeof window !== 'undefined'
-        ? (getToken() || localStorage.getItem('douxsii-admin-token') || localStorage.getItem('accessToken') || localStorage.getItem('token'))
+        ? (getToken() || localStorage.getItem('Denior-admin-token') || localStorage.getItem('accessToken') || localStorage.getItem('token'))
         : null) || '';
 
     const cleanToken = rawToken ? rawToken.replace(/^Bearer\s+/i, '') : '';
