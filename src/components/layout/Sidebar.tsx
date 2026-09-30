@@ -77,7 +77,7 @@ const Sidebar = () => {
                             path: 'shop/products',
                             icon: <FiBox size={18} />,
                         },
-                         {
+                        {
                             key: 'my-shop-orders',
                             label: 'Order',
                             path: 'shop/orders',
@@ -89,8 +89,8 @@ const Sidebar = () => {
                             path: 'my-shop',
                             icon: <FiSettings size={18} />,
                         },
-                       
-                        
+
+
                     ],
                 };
             }
@@ -181,11 +181,11 @@ const Sidebar = () => {
                 <div className="flex flex-col h-full">
                     {/* Header/Logo Section */}
                     <Link to="/">
-                        <div className="flex flex-col items-center justify-center pt-8 pb-6  transition-all hover:opacity-90">
+                        <div className="flex flex-col items-center justify-center pt-8 pb-6">
                             <img
                                 src="/logo.png"
                                 alt="Logo"
-                                className="w-16 h-16 object-contain rounded-full shadow-sm"
+                                className="w-20 h-20"
                                 onError={(e) => {
                                     (e.target as HTMLImageElement).src = "/vite.svg";
                                 }}
